@@ -347,7 +347,7 @@ string opt_simp ="Perp: " + Wbis + " Recoil: " + Wrec + " Uncertainty: " + Wunc 
 
 	
 	ofstream myfile;
-    myfile.open ("/home/chasco/Documents/Trees/Optimization/CutFlow_"+OptimizedVariable+"_"+LEPTON_TYPE+".txt");    
+    myfile.open ("CutFlow_"+OptimizedVariable+"_"+LEPTON_TYPE+".txt");    
 
 
 	myfile << "\n\n";
@@ -469,7 +469,7 @@ TIter next(gDirectory->GetList()); //Deletes histograms to avoid memory leaks
 
 void Optimize_SplusB_(){
 
-gROOT->ProcessLine(".x LoadRootFiles.C");
+gROOT->ProcessLine(".x /afs/cern.ch/user/c/chasco/InvisibleHiggs/LoadRootFiles.C");
 
 TString Preselection_Zdimuons = LUM + "*CrossSection*(1/NumGenEvents)*puweight*(l1_id*l2_id == -13*13)";
 TString Preselection_Zdielectrons = LUM + "*CrossSection*(1/NumGenEvents)*puweight*(l1_id*l2_id == -11*11)";
