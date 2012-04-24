@@ -36,29 +36,29 @@ TString COPYCUT = "(ln==0)*(Cosmic==0)*(abs(Mass_Z - 91.2)<10)*(Pt_Z>30)*(DeltaP
 
 
 //THECOPYTREE
-TFile *MC_DYJetsToLL_0_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_0.root","RECREATE");
+TFile *MC_DYJetsToLL_0_f2 = new TFile("new_MC_DYJetsToLL_0.root","RECREATE");
 TTree * MC_DYJetsToLL_0_tree = MC_DYJetsToLL_0_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_1_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_1.root","RECREATE");
+TFile *MC_DYJetsToLL_1_f2 = new TFile("new_MC_DYJetsToLL_1.root","RECREATE");
 TTree * MC_DYJetsToLL_1_tree = MC_DYJetsToLL_1_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_2_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_2.root","RECREATE");
+TFile *MC_DYJetsToLL_2_f2 = new TFile("new_MC_DYJetsToLL_2.root","RECREATE");
 TTree * MC_DYJetsToLL_2_tree = MC_DYJetsToLL_2_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_3_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_3.root","RECREATE");
+TFile *MC_DYJetsToLL_3_f2 = new TFile("new_MC_DYJetsToLL_3.root","RECREATE");
 TTree * MC_DYJetsToLL_3_tree = MC_DYJetsToLL_3_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_4_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_4.root","RECREATE");
+TFile *MC_DYJetsToLL_4_f2 = new TFile("new_MC_DYJetsToLL_4.root","RECREATE");
 TTree * MC_DYJetsToLL_4_tree = MC_DYJetsToLL_4_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_5_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_5.root","RECREATE");
+TFile *MC_DYJetsToLL_5_f2 = new TFile("new_MC_DYJetsToLL_5.root","RECREATE");
 TTree * MC_DYJetsToLL_5_tree = MC_DYJetsToLL_5_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_6_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_6.root","RECREATE");
+TFile *MC_DYJetsToLL_6_f2 = new TFile("new_MC_DYJetsToLL_6.root","RECREATE");
 TTree * MC_DYJetsToLL_6_tree = MC_DYJetsToLL_6_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_7_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_7.root","RECREATE");
+TFile *MC_DYJetsToLL_7_f2 = new TFile("new_MC_DYJetsToLL_7.root","RECREATE");
 TTree * MC_DYJetsToLL_7_tree = MC_DYJetsToLL_7_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_8_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_8.root","RECREATE");
+TFile *MC_DYJetsToLL_8_f2 = new TFile("new_MC_DYJetsToLL_8.root","RECREATE");
 TTree * MC_DYJetsToLL_8_tree = MC_DYJetsToLL_8_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_DYJetsToLL_9_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_DYJetsToLL_9.root","RECREATE");
+TFile *MC_DYJetsToLL_9_f2 = new TFile("new_MC_DYJetsToLL_9.root","RECREATE");
 TTree * MC_DYJetsToLL_9_tree = MC_DYJetsToLL_9_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_ZZ_0_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_ZZ_0.root","RECREATE");
+TFile *MC_ZZ_0_f2 = new TFile("new_MC_ZZ_0.root","RECREATE");
 TTree * MC_ZZ_0_tree = MC_ZZ_0_pre_tree -> CopyTree(COPYCUT);
-TFile *MC_ZZ_1_f2 = new TFile("/home/chasco/Documents/Trees/Rootfiles/Modified/COPYSTORE/new_MC_ZZ_1.root","RECREATE");
+TFile *MC_ZZ_1_f2 = new TFile("new_MC_ZZ_1.root","RECREATE");
 TTree * MC_ZZ_1_tree = MC_ZZ_1_pre_tree -> CopyTree(COPYCUT);
 
 
