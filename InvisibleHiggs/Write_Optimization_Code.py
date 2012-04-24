@@ -50,7 +50,7 @@ CorrectN = -1 #default
 templatefile_load = open('LoadRootFiles_TEMP.C','r') #opens template of branch adding (this is the file you edit)
 newfile_load = open('LoadRootFiles.C','w') #open write file for each root file
 
-CASTOR = 0	####### MAKE A CASTOR OPTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+
 COPYCUT = '"(ln==0)*(Cosmic==0)*(abs(Mass_Z - 91.2)<10)*(Pt_Z>30)*(DeltaPhi_metjet>0.5)*(Pt_J1 < 30)*(DeltaPhi_metjet > 0.5)*(pfMEToverPt_Z > 0.4)*(pfMEToverPt_Z < 1.8)"'
 #PRECUT = '"CrossSection*puweight*(1/NumGenEvents)"+LEPTON_TYPE'
 PRECUT = 'Preselection'
@@ -61,8 +61,9 @@ for line in templatefile_load: #loop over lines in loader template file
 	newfile_load.write(line)
 	if "//THETFILE" in line:
 		if BATCH:
+			directory = castor_directory
 			for F in range(len(list_of_root)): #loop over position of root files in vector, opens files
-				lineTHETFILE = line.replace("//THETFILE", 'TFile *'+list_of_root_notype[F]+'_f = TFile::Open("rfio:'+castor_directory+list_of_root[F]+'");')
+				lineTHETFILE = line.replace("//THETFILE", 'TFile *'+list_of_root_notype[F]+'_f = TFile::Open("rfio:'+directory+list_of_root[F]+'");')
 				newfile_load.write(lineTHETFILE)
 		else:
 			for F in range(len(list_of_root)): #loop over position of root files in vector, opens files
@@ -73,8 +74,12 @@ for line in templatefile_load: #loop over lines in loader template file
 			lineTHEGETTREE = line.replace("//THEGETTREE", 'TTree *'+list_of_root_notype[F]+'_pre_tree = (TTree *)'+list_of_root_notype[F]+'_f->Get("data");')
 			newfile_load.write(lineTHEGETTREE)
 	if "//THECOPYTREE" in line:
+		if BATCH:
+			directory = ''
+		else:
+			directory = directory + 'COPYSTORE/'
 		for F in range(len(list_of_root)): #copies trees with cut to speed up opt script
-			lineTHECOPYTREE = line.replace("//THECOPYTREE",'TFile *'+list_of_root_notype[F]+'_f2 = new TFile("'+directory+'COPYSTORE/new_'+list_of_root[F]+'","RECREATE");')
+			lineTHECOPYTREE = line.replace("//THECOPYTREE",'TFile *'+list_of_root_notype[F]+'_f2 = new TFile("'+directory+'new_'+list_of_root[F]+'","RECREATE");')
 			lineTHECOPYTREE2 = line.replace("//THECOPYTREE",'TTree * '+list_of_root_notype[F]+'_tree = '+list_of_root_notype[F]+'_pre_tree -> CopyTree(COPYCUT);')
 			newfile_load.write(lineTHECOPYTREE)
 			newfile_load.write(lineTHECOPYTREE2)
