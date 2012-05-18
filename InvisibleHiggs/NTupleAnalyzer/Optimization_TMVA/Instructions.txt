@@ -1,0 +1,47 @@
+You need to get this repository to an lxplus machine:
+
+cmsrel CMSSW_4_2_8
+cd CMSSW_4_2_8/src
+cmsenv
+cvs co -d NTupleAnalyzerV2 UserCode/baumgartel/LQ/NTupleAnalyzerV2
+cd NTupleAnalyzerV2/Optimization_TMVA
+
+First add the TMVA package.
+
+   cp -r /afs/cern.ch/sw/lcg/app/releases/ROOT/5.27.06/x86_64-slc5-gcc43-opt/root/tmva/ .
+   
+Backup needed files:
+
+    cp tmva/test/TMVAClassification.C tmva/test/TMVAClassification_BAK.C
+    cp tmva/test/TMVAClassificationApplication.C tmva/test/TMVAClassificationApplication_BAK.C
+
+
+Edit the setup file to your liking (TMVASetup.py)
+
+Run the preparation with :
+
+	python TMVAPrep.py 
+
+
+Then you can either:
+
+1) Run interactively:
+
+  A) ./RunAllOptimizations.sh 
+  B) Results are in your lxplus tmp/username/tmva_scratch
+  
+2) Run on batch (TMVA Setup must refer to CASTOR files for this): 
+
+  A) python Opt_BSubber.py
+  B) Wait for bjobs to finish
+  C) Get the job output from castor to local by running the 'detar' script:
+     (Opt_BSubber.py would have made a detar_[datelabel].sh script for this)
+     
+
+So now you've trained the MVA method(s) of your choice. You must apply them to your samples. 
+
+One way of doing this (in beta!) is load all the root files you are intereted in, and evaluate classifier
+for each event, and store it in a branch along side the normal branches of your trees. 
+
+A script in (again, in beta!) to do this is "Evaluation.py". Fill out the information at the top and run
+it in python. Then you can use the new classifier variables for plotting/cutting/etc.
