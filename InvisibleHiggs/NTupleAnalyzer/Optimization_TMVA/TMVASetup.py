@@ -4,7 +4,7 @@
 #directory = '/afs/cern.ch/user/d/darinb/neuhome/LQAnalyzerOutput/NTupleAnalyzer_V00_02_06_Default_StandardSelections_Dec27_4p7fb_2011_12_27_20_16_37/SummaryFiles'
 #directory = '/castor/cern.ch/user/d/darinb/LQAnalyzerOutput/NTupleAnalyzer_V00_02_06_Default_StandardSelections_4p7fb_Jan17_TEST_2012_01_17_18_23_52/SummaryFiles'
 #directory = '/castor/cern.ch/user/c/chasco/TREES/'
-directory = '/tmp/chasco/ORIGINAL/'
+directory = '/tmp/chasco/PLACE/NEW/'
 # Background root files without the .root
 #backgroundtags = ['MC_DYJetsToLL','MC_SingleT_','MC_SingleTbar_','MC_TTJets','MC_WJetsToLNu']
 #backgroundtags = ['MC_DYJetsToLL','MC_SingleT_s','MC_SingleT_t','MC_SingleT_tW','MC_SingleTbar_s','MC_SingleTbar_t','MC_SingleTbar_tW','MC_TTJets','MC_WJetsToLNu','MC_WW','MC_WZ','MC_ZZ']
@@ -15,7 +15,8 @@ datatag = 'Data_'
 # Variables you will optimize with
 #discriminatingvariables = [['M_muon1muon2','ST_pf_mumu','LowestMass_BestLQCombo','((M_bestmupfjet1_mumu > M_bestmupfjet2_mumu)*M_bestmupfjet1_mumu + (M_bestmupfjet1_mumu < M_bestmupfjet2_mumu)*M_bestmupfjet2_mumu)'],['MT_muon1pfMET','MET_pf','Pt_muon1','ST_pf_munu','M_bestmupfjet_munu','(abs(deltaPhi_muon1pfMET))','(abs(deltaPhi_pfjet1pfMET))','(abs(deltaPhi_pfjet2pfMET))']]
 #discriminatingvariables = [['M_muon1muon2','LowestMass_BestLQCombo','ST_pf_mumu'],['MET_pf','Pt_muon1','ST_pf_munu','M_bestmupfjet_munu']]
-discriminatingvariables = [['Z_rapidity_z','THRUST_2D','L1_L2_cosangle','TransMass_ZH150_uncl','TransMass_ZH150','DeltaPhi_ZH','DeltaPhi_ZH_uncl','CMAngle','CS_cosangle']]
+
+discriminatingvariables = [['TransMass_ZH105','THRUST_2D','L1_L2_cosangle','DeltaPhi_ZH','CS_cosangle','Pt_L2'],['TransMass_ZH115','THRUST_2D','L1_L2_cosangle','DeltaPhi_ZH','CS_cosangle','Pt_L2'],['TransMass_ZH125','THRUST_2D','L1_L2_cosangle','DeltaPhi_ZH','CS_cosangle','Pt_L2'],['TransMass_ZH150','THRUST_2D','L1_L2_cosangle','DeltaPhi_ZH','CS_cosangle','Pt_L2']]
 #redMETd0_elec_DYZZ
 # Naming convention for output files
 tagname = 'test'
@@ -35,13 +36,15 @@ preselection_basic = '((cat == 1) + (cat == 2))*(ln==0)*(Cosmic==0)*(fabs(Mass_Z
 
 preselection_lepton = '' #both, #'*(cat == 1)' #muon pair
 
+preselection_lowjet = '*((1-(jn>0))+(jn > 0)*(sqrt(pow(jn_px[abs(jn-1)],2)+pow(jn_py[abs(jn-1)],2)+pow(jn_pz[abs(jn-1)],2))>15.0))'
+
 preselection_btag = '*((Pt_Jet_btag_CSV_max > 20)*(btag_CSV_max < 0.244) + (1-(Pt_Jet_btag_CSV_max > 20)))'
 
-preselection_MET = '*(sqrt(pow(dilepPROJLong + 1.25*recoilPROJLong + 0.0*uncertPROJLong,2)*(dilepPROJLong + 1.25*recoilPROJLong + 0.0*uncertPROJLong > 0) + 1.0*pow(dilepPROJPerp + 1.25*recoilPROJPerp + 0.0*uncertPROJPerp,2)*(dilepPROJPerp + 1.25*recoilPROJPerp + 0.0*uncertPROJPerp > 0)) > 45.0)' #both
+#preselection_MET = '*(sqrt(pow(dilepPROJLong + 1.25*recoilPROJLong + 0.0*uncertPROJLong,2)*(dilepPROJLong + 1.25*recoilPROJLong + 0.0*uncertPROJLong > 0) + 1.0*pow(dilepPROJPerp + 1.25*recoilPROJPerp + 0.0*uncertPROJPerp,2)*(dilepPROJPerp + 1.25*recoilPROJPerp + 0.0*uncertPROJPerp > 0)) > 45.0)' #both dzero
 
-#preselection_MET = '*(sqrt(pow(dilepPROJLong + 1.0*recoilPROJLong + 1.0*uncertPROJLong,2)*(dilepPROJLong + 1.0*recoilPROJLong + 1.0*uncertPROJLong > 0) + 1.5*pow(dilepPROJPerp + 1.0*recoilPROJPerp + 1.0*uncertPROJPerp,2)*(dilepPROJPerp + 1.0*recoilPROJPerp + 1.0*uncertPROJPerp > 0)) > 55.0)' #electron
+preselection_MET = '*(sqrt(pow(dilepPROJLong + 0.75*(sumjetPROJLong*(abs(dilepPROJLong - 0.75*unclPROJLong) >= abs(dilepPROJLong + 0.75*sumjetPROJLong)) - unclPROJLong*(abs(dilepPROJLong - 0.75*unclPROJLong) < abs(dilepPROJLong + 0.75*sumjetPROJLong))),2) + 1.0*pow(dilepPROJPerp + 0.75*(sumjetPROJPerp*(abs(dilepPROJPerp - 0.75*unclPROJPerp) >= abs(dilepPROJPerp + 0.75*sumjetPROJPerp)) - unclPROJPerp*(abs(dilepPROJPerp - 0.75*unclPROJPerp) < abs(dilepPROJPerp + 0.75*sumjetPROJPerp))),2)) > 50.0)' #both cms
 
-preselection = preselection_basic + preselection_lepton + preselection_btag + preselection_MET # + avoid_NAN_errors
+preselection = preselection_basic + preselection_lepton + preselection_btag + preselection_lowjet + preselection_MET # + avoid_NAN_errors (doesn't work that way)
 
 
 #preselectionmumu ='((Pt_muon1>40)*(Pt_muon2>40)*(Pt_pfjet1>30)*(Pt_pfjet2>30)*(ST_pf_mumu>250)*(deltaR_muon1muon2>0.3)*(M_muon1muon2>50)*((abs(Eta_muon1)<2.1)||(abs(Eta_muon2)<2.1)))*(abs(deltaPhi_muon1pfMET)>.8)*(abs(deltaPhi_pfjet1pfMET)>.5)'
@@ -52,10 +55,11 @@ preselection = preselection_basic + preselection_lepton + preselection_btag + pr
 
 # Signal root files will begin with the following. Can be multiple, like  LQToCMu_M_350.root and LQToCMu_M_550.root 
 #signaltags = ['LQToCMu_M','LQToCMu_BetaHalf_M']
-signaltags = ['MC_ZH150']
+signaltags = ['MC_ZH105','MC_ZH115','MC_ZH125','MC_ZH150']
+#signaltags = ['MC_ZH150']
 # preselections correspond to above signal types
 #preselections = [preselectionmumu,preselectionmunu]
-preselections = [preselection]
+preselections = [preselection,preselection,preselection,preselection]
 
 # MVA Methods to employ
 #methods = ['CutsGA']
