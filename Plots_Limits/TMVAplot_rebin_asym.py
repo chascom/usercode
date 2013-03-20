@@ -62,8 +62,9 @@ def CumulativeBin(inputhisto,cutoff,name):
 		
 	return [hout, newbins]
 
-def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Application,Luminosity,InjectSignal,FitScale,STAGE,BkgdZH,curvefit,imageout,AdditionalCut):#plot making function
+def MakePlot(names_nonorder,variableOrig,bin,min,max,_BoundariesOfBins,logy,Application,Luminosity,InjectSignal,FitScale,STAGE,BkgdZH,curvefit,imageout,AdditionalCut):#plot making function
 	BoundariesOfBins = [x for x in _BoundariesOfBins]
+	variable = variableOrig.replace("_REG","")
 	nullhyp=False
 	inj = ""
 	if (InjectSignal):
@@ -166,7 +167,7 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 		if ('ZH' in n) and (BkgdZH in n):
 			exec('H_Bkgd.Add(oh_'+n+')')
 	for n in ZHiggs:
-		if (n in variable) or ((ShowZH125inZZ) and (("ZZ" in variable) or ("zpt" in variable)) and ("ZH125" in n)): ##include ZH125 in ZZ discriminator
+		if (n in variable) or ((ShowZH125inZZ) and (("ZZ" in variable) or ("_REG" in variableOrig)) and ("ZH125" in n)): ##include ZH125 in ZZ discriminator
 			exec('H_Sign.Add(oh_'+n+')')
 			print "ADDING THE SIGNAL "*5
 			print('H_Sign.Add(oh_'+n+')')
@@ -380,7 +381,7 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 		bin_array.append(n[-1])
 
 	rearrbool = 1
-	if "zpt" in variable:#don't rearrange this variable
+	if "_REG" in variableOrig:#don't rearrange this variable
 		bin_array.sort()
 		rearrbool = 0
 
@@ -641,9 +642,11 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 	FileFF.Close()
 
 	#################################################################################################################
-	makestackplots = False
+	makestackplots = True
 	if makestackplots:
 		pad1.cd()
+		if logy:
+			pad1.SetLogy()
 
 			
 		#H_Data=TH1F("H_Data",variable+" "+inj+" "+str(Application),bin,min,max)
@@ -728,7 +731,7 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 		
 		for b in range(len(NotStackList)):
 			if ("ZH" in NotStackList[b]):#just show ZH sample of interest
-				if (NotStackList[b] in variable) or ((ShowZH125inZZ) and ("ZH125" in NotStackList[b]) and (("ZZ" in variable) or ("zpt" in variable))):#just show ZH sample of interest
+				if (NotStackList[b] in variable) or ((ShowZH125inZZ) and ("ZH125" in NotStackList[b]) and (("ZZ" in variable) or ("_REG" in variableOrig))):#just show ZH sample of interest
 					if(not FitScale):
 						N1 = 1.0
 					## print "N1:",N1,"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
@@ -760,7 +763,11 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 		if (maxm > maxd):
 			maxc = maxm
 		H_Data.SetMaximum(1.1*(maxc))
-		H_Data.SetMinimum(0.0)
+		
+		if logy:
+			H_Data.SetMinimum(0.01)
+		else:
+			H_Data.SetMinimum(0.0)
 		#result.SetLineWidth(2)
 		#result.SetLineColor(1)
 		#result.SetLineStyle(1)
@@ -771,7 +778,7 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 		leg.SetTextSize(0.1)
 		leg.SetFillColor(0)
 		leg.SetBorderSize(0)
-		leg.AddEntry(H_Data,"2011 Data "+str(Luminosity)+"pb^{-1}")
+		leg.AddEntry(H_Data,"2011"*(1-TeV8) + "2012"*TeV8 +" Data "+str(Luminosity/1000)+"fb^{-1}")
 		#if (InjectSignal):
 			#leg.AddEntry(H_Sign_Inj,ZHiggs[NN]+"*"+str(InjScale)+" injected")
 
@@ -784,7 +791,7 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 		for n in names:
 			if 'Data' not in n:
 				if 'ZH' in n:
-					if (n in variable) or ((ShowZH125inZZ) and (("ZZ" in variable) or ("zpt" in variable)) and ('ZH125' in n)):
+					if (n in variable) or ((ShowZH125inZZ) and (("ZZ" in variable) or ("_REG" in variableOrig)) and ('ZH125' in n)):
 						exec('leg.AddEntry(h_'+n+',"'+n+'*'+N1_round+'")')
 					if (BkgdZH in n):
 						exec('leg.AddEntry(h_'+n+',"'+n+'")')
@@ -797,6 +804,7 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 		####################################################################################################
 		######## Make plot of Data/MC
 		pad2.cd()
+		
 		h_comp = TH1F("h_comp","",bin,min,max) #make plot to look at ratios of MC and DATA bins
 		H_MC = TH1F("H_MC","",bin,min,max)
 		H_MC.Sumw2()
@@ -878,10 +886,12 @@ def MakePlot(names_nonorder,variable,bin,min,max,_BoundariesOfBins,logy,Applicat
 
 		leg.Draw("SAME")
 
-		if (logy):
-			c2.Print(imageout+'/'+variable+str(Application)+'_'+inj+'_new.png')
-		else:
-			c2.Print(imageout+'/'+variable+str(Application)+'_'+inj+STAGE+'_lin_'+str(curvefit)+'.png')
+		os.system("mkdir "+imageout)
+
+		# if (logy):
+		# 	c2.Print(imageout+'/'+variable+str(Application)+'_'+inj+'_new.png')
+		# else:
+		c2.Print(imageout+'/'+variable+str(Application)+'_'+inj+STAGE+'_lin'*(1-logy)+'_'+str(curvefit)+'.png')
 		
 		#First = False
 		#if ('LikelihoodF_ZH125' in variable):
@@ -923,9 +933,10 @@ predir = '/afs/cern.ch/work/c/chasco/'
 #sdir = predir+'FINISH_TMVA/Trees_FUSION2_feb15__4000_6_1000_6_500_4/'
 #sdir = predir+'FINISH_TMVA/Trees_FUSION2_feb21_7TeV_4000_6_1000_6_500_4/'
 #sdir = predir+'FINISH_TMVA/Trees_FUSION2_mar4_7TeV_4000_6_1000_6_500_4/'
-sdir = predir+'FINISH_TMVA/Trees_FUSION2_mar6_8TeV_1000_5_500_5_500_4/'
+#sdir = predir+'FINISH_TMVA/Trees_FUSION2_mar6_8TeV_1000_5_500_5_500_4/'
+sdir = predir+'mar20_7TeV/'
 #imgout = '/afs/cern.ch/work/c/chasco/CMSSW_5_3_3_patch2/src/CMGTools/HtoZZ2l2nu/TMVA_images/'
-imgout = 'TMVA_test/SoverB2'
+imgout = 'TMVA_test/SoverB3'
 #sdir = predir+'Jan10_redmet/'
 
 files = os.listdir(sdir)
@@ -963,7 +974,7 @@ for f in range(len(infiles)):
 #Sigma_ZH_error = []
 #BSigma_ZH = []
 #BSigma_ZH_error = []
-TeV8 = True
+TeV8 = False
 Inject = False
 CurveFit = False
 BkgdZH = "444"
@@ -982,9 +993,11 @@ txtname = "compare.txt"
 Suffix = ["","_jerup","_jerdown","_jesup","_jesdown","_umetup","_umetdown","_lesup","_lesdown","_puup","_pudown","_btagup","_btagdown"]
 #Suffix = [""]
 #variables = ["ZH105","ZH115","ZH125","ZH135","ZH145","ZH150","ZZ","zpt"]
-variables = ["ZH105","ZH115","ZH125","ZH135","ZH145","ZZ","zpt"]
+#variables = ["ZH105","ZH115","ZH125","ZH135","ZH145","ZZ","zpt_REG","met_REG","REDmet_REG"]
+variables = ["zpt_REG","met_REG","REDmet_REG"]
 #variables = ["zpt"]
-additionalCut = '*(REDmet > 80)'
+#additionalCut = '*(REDmet > 80)'
+additionalCut = ""
 additionalCut_str = additionalCut.replace(">","gt").replace("<","lt").replace("*","").replace("(","").replace(")","").replace(" ","")
 #additionalCut = ''
 LikelihoodBins = [0.0,0.5,0.8,1.0]
@@ -992,8 +1005,9 @@ zptBins = [30.0,110.0,220.0,700.0]
 
 for x in Suffix:
 	for v in variables:
-		if "zpt" in v:
-			Lphy = MakePlot(names,v,30,30.0,700.0,zptBins,False,True,5035,Inject,True,x,'nope',CurveFit,imgout,additionalCut)
+		if "_REG" in v:
+			#Lphy = MakePlot(names,v,30,30.0,700.0,zptBins,False,True,5035,Inject,True,x,'nope',CurveFit,imgout,additionalCut)
+			Lphy = MakePlot(names,v,30,0.0,300.0,zptBins,True,True,5035,Inject,True,x,'nope',CurveFit,imgout,additionalCut)
 		else:
 			if "ZH" in v:
 				# print "BEFORE FUNCTION <><><><><><><<><><><><><><><><><><><><><><><><><><><><><><><><><", LikelihoodBins
@@ -1012,7 +1026,10 @@ else:
 
 
 
-for v in variables:
+for w in variables:
+	v = w.replace("_REG","")
+	if v == "met":
+		v = "_"+v
 	if TeV8:
 		os.system("hadd ShapeFiles/HADD8TeV2_"+additionalCut_str+"/"+v+".root ShapeFiles/*Shape*"+v+"*.root")
 	else:
