@@ -11,9 +11,8 @@ import array
 import random
 
 
-lumi = float(sys.argv[1]) #string input to float, lumi = 5035 (5550)? jul 31, lumi 8TeV = 21790 
-hadder = str(sys.argv[2])
-
+#lumi = float(sys.argv[1]) #string input to float, lumi = 5035 (5550)? jul 31, lumi 8TeV = 21790 
+hadder = str(sys.argv[1])
 #def SEt(E):
 	#S = 0.03
 	#N = 0.2
@@ -100,6 +99,7 @@ def TransBoosted_Angle(pt1,eta1,phi1,pt2,eta2,phi2,ptz,etaz,phiz,mass,Met,Metphi
 TeV8 = True
 SampleList = []
 if (TeV8): #organize this better
+	lumi = 19700
 	 #sample, cross section, branching ratio
 	SampleList.append(['DYJetsToLL_10to50',860.5,1])
 	SampleList.append(['DYJetsToLL_50toInf',3532.8,1])
@@ -117,11 +117,16 @@ if (TeV8): #organize this better
 	SampleList.append(['WW',57.1097,0.104976])
 	SampleList.append(['WZ',22.9,0.032715576])
 	SampleList.append(['ZZ',8.383678,0.038701987])
-	SampleList.append(['ZH105',0.04915,1])
-	SampleList.append(['ZH115',0.03697,1])
-	SampleList.append(['ZH125',0.02755,1])
-	SampleList.append(['ZH135',0.02085,1])
-	SampleList.append(['ZH145',0.01598,1])
+	# SampleList.append(['ZH105',0.04915,1])
+	# SampleList.append(['ZH115',0.03697,1])
+	# SampleList.append(['ZH125',0.02755,1])
+	# SampleList.append(['ZH135',0.02085,1])
+	# SampleList.append(['ZH145',0.01598,1])
+	SampleList.append(['ZH105',0.6750,0.100974])
+	SampleList.append(['ZH115',0.5117,0.100974])
+	SampleList.append(['ZH125',0.3943,0.100974])
+	SampleList.append(['ZH135',0.3074,0.100974])
+	SampleList.append(['ZH145',0.2424,0.100974])
 	SampleList.append(['Data',1,1])
 
 	Processes = []
@@ -140,15 +145,56 @@ if (TeV8): #organize this better
 			Lumi.append(lumi)
 
 else:
-	Processes = ['DYJetsToLL','SingleTbar_s','SingleTbar_t.','SingleTbar_tW.','SingleT_s','SingleT_t.','SingleT_tW.','TTJets','WJetsToLNu','WW','WZ','ZZ','ZH105','ZH115','ZH125','ZH135','ZH145','ZH150','Data'] #list of samples
-	XSections = [3048,1.44,22.6,7.87,3.19,41.92,7.87,165,31314,5.5,0.856,6.46,0.04001,0.02981,0.02231,0.01700,0.01323,0.01171,1] #ZZ2l2nu 0.1917
+	#Processes = ['DYJetsToLL','SingleTbar_s','SingleTbar_t.','SingleTbar_tW.','SingleT_s','SingleT_t.','SingleT_tW.','TTJets','WJetsToLNu','WW','WZ','ZZ','ZH105','ZH115','ZH125','ZH135','ZH145','ZH150','Data'] #list of samples
+	#XSections = [3048,1.44,22.6,7.87,3.19,41.92,7.87,165,31314,5.5,0.856,6.46,0.04001,0.02981,0.02231,0.01700,0.01323,0.01171,1] #ZZ2l2nu 0.1917
 	#BranchRat = [1,1,1,1,1,1,1,1,1,1,1,0.0403896,1,1,1,1,1,1,1] #ZZ 0.0403896
-	BranchRat = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-	Lumi = [lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,1]
+	#BranchRat = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+	#Lumi = [lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,lumi,1]
+	lumi = 5035
+	SampleList.append(['DYJetsToLL',3048,1])
+	SampleList.append(['SingleTbar_s',1.44,1])
+	SampleList.append(['SingleTbar_t.',22.65,1])
+	SampleList.append(['SingleTbar_tW.',7.87,1])
+	SampleList.append(['SingleT_s',3.19,1])
+	SampleList.append(['SingleT_t.',41.92,1])
+	SampleList.append(['SingleT_tW.',7.87,1])
+	SampleList.append(['TTJets',165,1])
+	SampleList.append(['WJetsToLNu',31314,1])
+	SampleList.append(['WW',5.5,1])
+	SampleList.append(['WZ',0.856,1])
+	SampleList.append(['ZZ',6.8294,1]) #"br":[0.038647521,0.994055467]
+	# SampleList.append(['ZH105',0.04001,1])
+	# SampleList.append(['ZH115',0.02981,1])
+	# SampleList.append(['ZH125',0.02231,1])
+	# SampleList.append(['ZH135',0.01700,1])
+	# SampleList.append(['ZH145',0.01323,1])
+	# SampleList.append(['ZH150',0.01171,1])
+	SampleList.append(['ZH105',0.5449,0.100974])
+	SampleList.append(['ZH115',0.4107,0.100974])
+	SampleList.append(['ZH125',0.3158,0.100974])
+	SampleList.append(['ZH135',0.2453,0.100974])
+	SampleList.append(['ZH145',0.1930,0.100974])
+	SampleList.append(['ZH150',0.01171,0.100974])
+	SampleList.append(['Data',1,1])
+
+	Processes = []
+	XSections = []
+	BranchRat = []
+	for s in SampleList:
+		Processes.append(s[0])
+		XSections.append(s[1])
+		BranchRat.append(s[2])
+
+	Lumi =[]
+	for x in Processes:
+		if 'Data' in x:
+			Lumi.append(1)
+		else:
+			Lumi.append(lumi)
 
 RND_CUT = 1.0/3.0
 
-SystematicSuffixList = ["","_jerup","_jerdown","_jesup","_jesdown","_umetup","_umetdown","_lesup","_lesdown","_puup","_pudown","_btagup","_btagdown","_sherpaup","_sherpadown"]
+SystematicSuffixList = ["","_jerup","_jerdown","_jesup","_jesdown","_umetup","_umetdown","_lesup","_lesdown","_puup","_pudown","_btagup","_btagdown"]#,"_sherpaup","_sherpadown"]
 #SystematicSuffixList = ['_renup','_rendown','_puup','_pudown','_factup','_factdown','_btagup','_btagdown']#,'','_jesup','_jesdown','_umetup','_umetdown','_lesup','_lesdown','_puup','_pudown','_renup','_rendown','_factup','_factdown','_btagup','_btagdown']
 
 if len(Processes) != len(XSections):
@@ -286,25 +332,29 @@ for f in range(len(infiles)):
 		exec('NN'+suff+'=tin'+suff+'.GetEntries()')
 	
 	
-	additionalvariables = ['XS','BR','LUM','NGE','B2','B3','RND','CUT','Thrust','DeltaPz','DeltaPhi_ZH','TransMass','TransMass2','TransMass_Eff','CScostheta','CMsintheta','Theta_Boost','Theta_lab','ZL1_Boost','ZL1_lab','ZL2_lab','SinBoost','phil2met','ZRapidity']#,'SigEt1','SigEt2','SigEt','SignifMET']#,'TBoost_METZ','TBoost_METL1','TBoost_METL2']#,'CScostheta']#,'ST','CScos']
+	additionalvariables = ['XS','BR','LUM','NGE','B2','B3','RND','CUT','Thrust','DeltaPz','DeltaPhi_ZH','TransMass','TransMass2','TransMass3','TransMass_Eff','CScostheta','CMsintheta','Theta_Boost','Theta_lab','ZL1_Boost','ZL1_lab','ZL2_lab','SinBoost','phil2met','ZRapidity']#,'SigEt1','SigEt2','SigEt','SignifMET']#,'TBoost_METZ','TBoost_METL1','TBoost_METL2']#,'CScostheta']#,'ST','CScos']
 	
 	for v in additionalvariables:
-		exec(v+' = numpy.zeros(1,dtype=float)')
+		#exec(v+' = numpy.zeros(1,dtype=float32)')
+		exec(v+' =  array.array("f",[0])')
+		 #variable = array.array("f",[0])
 		for suff in SystematicSuffixList_temp:
-			exec('tout'+suff+'.Branch(\''+v+'\','+v+',\''+v+'/D\')')
+			exec('tout'+suff+'.Branch(\''+v+'\','+v+',\''+v+'/F\')')
 			
 	for v in SystematicSuffixList_temp:
-		exec('sys'+v+'= numpy.zeros(1,dtype=float)')
+		#exec('sys'+v+'= numpy.zeros(1,dtype=float)')
+		exec('sys'+v+' =  array.array("f",[0])')
 		for suff in SystematicSuffixList_temp:
-			exec('tout'+suff+'.Branch(\'sys'+v+'\',sys'+v+',\'sys'+v+'/D\')')
+			exec('tout'+suff+'.Branch(\'sys'+v+'\',sys'+v+',\'sys'+v+'/F\')')
 	
 	#SetPtEtaPhiM
 	#DeltaPhi_ll = fabs(L1_4.DeltaPhi(L2_4))
 
 	for v in variables: #trees added automatically, from Ntuple
-		exec(v+' = numpy.zeros(1,dtype=float)')
+		#exec(v+' = numpy.zeros(1,dtype=float)')
+		exec(v+' =  array.array("f",[0])')
 		for suff in SystematicSuffixList_temp:
-			exec('tout'+suff+'.Branch(\''+v+'\','+v+',\''+v+'/D\')')
+			exec('tout'+suff+'.Branch(\''+v+'\','+v+',\''+v+'/F\')')
 		
 	L1 = TLorentzVector() ####### causes function to be out of scope?!
 	L2 = TLorentzVector()
@@ -317,15 +367,16 @@ for f in range(len(infiles)):
 	#for h in HiggsMass:
 		#exec('MET'+h+' = TLorentzVector()')
 		#exec('TransMass'+h+' = numpy.zeros(1,dtype=float)')
-		#exec('tout.Branch(\'TransMass'+h+'\',TransMass'+h+',\'TransMass'+h+'/D\')')
+		#exec('tout.Branch(\'TransMass'+h+'\',TransMass'+h+',\'TransMass'+h+'/F\')')
 		#exec('TransMass_Eff'+h+' = numpy.zeros(1,dtype=float)')
-		#exec('tout.Branch(\'TransMass_Eff'+h+'\',TransMass_Eff'+h+',\'TransMass_Eff'+h+'/D\')')
+		#exec('tout.Branch(\'TransMass_Eff'+h+'\',TransMass_Eff'+h+',\'TransMass_Eff'+h+'/F\')')
 	for suff in SystematicSuffixList_temp:
 		exec('N = NN'+suff)
 		for n in range(N):
 			exec('tin'+suff+'.GetEntry(n)')
-			if n%1000 == 1:
+			if n%5000 == 1:
 				print outfiles[f],'events ',n,'of',N
+				print f+1, len(outfiles), "<>"*20
 				
 			#for suff in SystematicSuffixList:
 			#if correct suff: 1
@@ -376,7 +427,8 @@ for f in range(len(infiles)):
 		#TransMass_EffZ[0] = math.sqrt(zpt[0]**2 + mass[0]**2) + met[0]
 			TransMass[0] = (L1 + L2 + MET).Mt()
 			TransMass_Eff[0] = L1.Et() + L2.Et() + MET.Et()
-			TransMass2[0]= math.sqrt(2*(L1.Pt()*L2.Pt()*abs(L1.DeltaPhi(L2)) + L1.Pt()*MET.Pt()*abs(L1.DeltaPhi(MET)) + L2.Pt()*MET.Pt()*abs(L2.DeltaPhi(MET)) ))
+			TransMass2[0]= math.sqrt(2*(L1.Pt()*L2.Pt()*(1-math.cos(abs(L1.DeltaPhi(L2)))) + L1.Pt()*MET.Pt()*(1-math.cos(abs(L1.DeltaPhi(MET)))) + L2.Pt()*MET.Pt()*(1-math.cos(abs(L2.DeltaPhi(MET)) ))))
+			TransMass3[0]= math.sqrt(2*(L1+L2).Pt()*MET.Pt()*(1-math.cos(abs(MET.DeltaPhi(L1+L2)))))
 
 			CScostheta[0] = costheta_CS(l1pt[0],l1eta[0],l1phi[0],l2pt[0],l2eta[0],l2phi[0],l1id[0])
 			CMsintheta[0] = sintheta_CM(l1pt[0],l1eta[0],l1phi[0],zpt[0],zeta[0],zphi[0],mass[0])
@@ -387,7 +439,7 @@ for f in range(len(infiles)):
 			ZL1_Boost[0] = Boost[2]
 			ZL1_lab[0] = Boost[3]
 			ZL2_lab[0] = Boost[4]
-			ZRapidity[0] = 0.5*math.log((ZB.E()+ZB.Pz())/(ZB.E()-ZB.Pz()))
+			ZRapidity[0] = ZB.Rapidity() #0.5*math.log((ZB.E()+ZB.Pz())/(ZB.E()-ZB.Pz()))
 
 		
 		
@@ -403,7 +455,7 @@ print VAA
 
 ######################################################################################
 
-Sstr = str(SystematicSuffixList_temp).replace("['",""+outdir+"Trees").replace("']","").replace("', '"," "+outdir+"Trees").replace(" ","/XXX ")+"/XXX"
+Sstr = str(SystematicSuffixList).replace("['",""+outdir+"Trees").replace("']","").replace("', '"," "+outdir+"Trees").replace(" ","/XXX ")+"/XXX"
 print Sstr
 
 os.system('mkdir '+ outdir + '/Trees_FUSION2')
@@ -415,9 +467,10 @@ print files_list[0]
 
 for f in files_list:
 	if ("Data" not in f):
+		print 'hadd '+outdir+'Trees_FUSION2/'+f+' '+Sstr.replace('XXX',f)
 		os.system('hadd '+outdir+'Trees_FUSION2/'+f+' '+Sstr.replace('XXX',f))
 
-os.system('mkdir /afs/cern.ch/work/c/chasco/Feb13_redmet_8TeV')
-os.system('cp '+outdir+'Trees_FUSION2/*.root /afs/cern.ch/work/c/chasco/Feb13_redmet_8TeV')
+os.system('mkdir /afs/cern.ch/work/c/chasco/Apr30_8TeV')
+os.system('cp '+outdir+'Trees_FUSION2/*.root /afs/cern.ch/work/c/chasco/Apr30_8TeV')
 ### name trees the same name
 ### HADD THE RESULTING MC FILES: DY w/ DY, ZZ w/ ZZ etc
