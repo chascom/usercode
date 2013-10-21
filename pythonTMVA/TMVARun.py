@@ -102,7 +102,7 @@ def MakeTTPlot(a_file,treename,variable,outputname,sigcut,bkgdcut):
   c5.Print(outputname)
 
 #################################################################################################################### Testing training function
-def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,methods):
+def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,methods,energy):
 
   inputvariables = inputfiles[2]
   
@@ -114,7 +114,7 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
   signame = inputfiles[0].split("/")[-1].replace('.root','')
   bkgdname = inputfiles[1].split("/")[-1].replace('.root','')
-  suffix = signame + "vs" + bkgdname
+  suffix = signame + "vs" + bkgdname + energy
 
   NB = TInB.GetEntries()
   NS = TInS.GetEntries()
@@ -282,7 +282,7 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
       MakeTTPlot("TMVA.root","TrainTree",x+suffix,x+suffix+"_train.png","(classID == 0)*weight","(classID == 1)*weight")
 
 ############################################################################################### Application function
-def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT):
+def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT,energy):
   #MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs)
   FInA = TFile.Open(inputdir + inputfile,"")
   TInA= FInA.Get(inputtree)
@@ -323,7 +323,7 @@ def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT
   for sbv in sigfilesfromTT:
     SvsB = sbv[0].replace('.root','')+'vs'+sbv[1].replace('.root','')
     for m in methods: #maybe couple "methods" to "sbv", if methods vary over sbv: #sbv[2]
-      exec("reader"+SvsB+".BookMVA('"+m+SvsB+"','weights/TMVAClassification_"+m+SvsB+".weights.xml')")
+      exec("reader"+SvsB+".BookMVA('"+m+SvsB+"','weights/TMVAClassification_"+m+SvsB+energy+".weights.xml')")
 
 
   #FOut = TFile.Open(inputfile.replace('.root','new.root'),"RECREATE")
@@ -420,7 +420,7 @@ def MakeTrialFile(Twofiles):
 
 #WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT" #may need to do cuts prior to this
 WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT"#*Wscale*Zscale"
-CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*(pBveto>0.0)*(training1>0.0)" #no raw booleans! put (bool > 0.0)
+CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*(pBveto>0.0)*(training2>0.0)" #no raw booleans! put (bool > 0.0)
 #CUTTING = "training*(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*pBveto"
 
 # INPUTVARS = ['phil1met','phil2met','Thrust','DeltaPz','DeltaPhi_ZH','TransMass3','TransMass4','CScostheta','CMsintheta']
@@ -447,8 +447,9 @@ METHODS = ["Likelihood"]
 #inputdir = "/tmp/chasco/INIT/HADD/TMVA/" #automate this, and the hadding
 #inputdir = "/afs/cern.ch/work/c/chasco/WDS_7/"
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/"
-inputdir = "/afs/cern.ch/work/c/chasco/OCT18_p66_8/"
-SkipLowStats = False
+inputdir = "/afs/cern.ch/work/c/chasco/OCT18_p66_7/"
+TeV = "7"
+SkipLowStats = True
 os.system("rm "+inputdir+"BKGDandZZ.root")
 os.system("rm "+inputdir+"BKGD.root")
 os.system("rm "+inputdir+"ZHcombo.root")
@@ -522,7 +523,7 @@ SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZZvsBKGD]]
 # print SBpairs
 
 for sb in SBpairs:
-  TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS)
+  TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV)
 
 
 ########################################################################## APPLICATION
@@ -532,7 +533,7 @@ for sb in SBpairs:
 outputdir = inputdir + "OUT_v2/"
 os.system("mkdir "+outputdir)
 for a in inputfileslistorig:
-  MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs)
+  MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
 
 
 # tmvaout = "/afs/cern.ch/work/c/chasco/WW_8/OUT_v2_TM3_mass/"
