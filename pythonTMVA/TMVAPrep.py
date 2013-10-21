@@ -190,7 +190,7 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 	BIN2 = H.GetBinContent(2)
 	BIN3 = H.GetBinContent(3)
 
-	RND_CUT = 0.5
+	RND_CUT = 0.66
 
 	L1 = TLorentzVector() ####### causes function to be out of scope?!
 	L2 = TLorentzVector()
@@ -218,7 +218,9 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 		tagalongvariables.append(y.GetName())
 	#print tagalongvariables
 
-	addinvariables = ['XS','BR','LUM','NGE','B2','B3','RND','WT','training0','training1','training2','training3','training4']#,'Wscale','Zscale']
+	addinvariables = ['XS','BR','LUM','NGE','B2','B3','RND']#,'WT']
+	addinvariables += ['WT0','WT1','WT2','WT3','WT4']
+	addinvariables += ['training0','training1','training2','training3','training4']#,'Wscale','Zscale']
 	addinvariables += ['XS2','BR2']
 	addinvariables += ['phil1met','phil2met','Thrust','DeltaPz','DeltaPhi_ZH','TransMass3','TransMass4','CScostheta','CMsintheta']
 	addinvariables += ['Theta_lab','ZL1_Boost','ZL1_lab','ZL2_lab','ZRapidity','Lep2Dover3D','ZMEToverLep3D','ZMEToverLep2D','l1l2metPt','l1l2minusmetPt']
@@ -277,12 +279,10 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 				B2[0] = 1.0
 				B3[0] = 1.0
 				RND[0] = 1.0
-				WT[0] = 1.0
-				training0[0] = 0.0
-				training1[0] = 0.0
-				training2[0] = 0.0
-				training3[0] = 0.0
-				training4[0] = 0.0
+				#WT[0] = 1.0
+				for rr in range(5):
+					exec('training'+str(rr)+'[0]=0.0')
+					exec('WT'+str(rr)+'[0]=1.0')
 				# Wscale[0] = 1.0
 				# Zscale[0] = 1.0
 			else:
@@ -298,25 +298,26 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 				# Zscale[0] = scale2data(f,finstate[0],TeV8)[1]
 				if SYS.replace("finalTree","sys") == "sys":
 					RND[0] = 1.0*random.uniform(0,1) #only do training/testing on non-varied
-					if (RND[0] < RND_CUT):
-						WT[0] = 1.0/(RND_CUT) #testing-training
-						#training0[0]=1.0
-					else:
-						WT[0] = 1.0/(1.0-RND_CUT) #application
+					# if (RND[0] < RND_CUT):
+					# 	WT[0] = 1.0/(RND_CUT) #testing-training
+					# 	#training0[0]=1.0
+					# else:
+					# 	WT[0] = 1.0/(1.0-RND_CUT) #application
 						#training0[0]=0.0
 					for rr in range(5):
 						if (1.0*random.uniform(0,1) < RND_CUT):
 							exec('training'+str(rr)+'[0]=1.0')
+							exec('WT'+str(rr)+'[0]=1.0/(RND_CUT)')
 						else:
 							exec('training'+str(rr)+'[0]=0.0')
+							exec('WT'+str(rr)+'[0]=1.0/(1.0-RND_CUT)')
 				else:
 					RND[0] = 1.0
-					WT[0]=1.0
-					training0[0] = 0.0
-					training1[0] = 0.0
-					training2[0] = 0.0
-					training3[0] = 0.0
-					training4[0] = 0.0
+					#WT[0]=1.0
+
+					for rr in range(5):
+						exec('training'+str(rr)+'[0]=0.0')
+						exec('WT'+str(rr)+'[0]=1.0')
 
 
 			L1.SetPtEtaPhiM(l1pt[0],l1eta[0],l1phi[0],0)
@@ -386,7 +387,7 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 
 # WHICH ENERGY?
 TeV8 = True
-outputdir="/afs/cern.ch/work/c/chasco/OCT18_p5_8/"
+outputdir="/afs/cern.ch/work/c/chasco/OCT19_p66_8/"
 
 SampleList = []
 SampleList1 = []
