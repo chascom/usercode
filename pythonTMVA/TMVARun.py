@@ -189,6 +189,37 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
                            "PruneMethod=NoPruning",
                            ]))
 
+    factory.BookMethod(TMVA.Types.kBDT, "BDT200" + suffix,
+                       ":".join([
+                           "!H",
+                           "!V",
+                           "NTrees=200",
+                           #"NTrees=1000",
+                           #"nEventsMin=150",
+                           "MaxDepth=2",
+                           "BoostType=AdaBoost",
+                           "AdaBoostBeta=0.5",
+                           "SeparationType=GiniIndex",
+                           "nCuts=-1",
+                           "PruneMethod=NoPruning",
+                           ]))
+
+    factory.BookMethod(TMVA.Types.kBDT, "BDT3" + suffix,
+                       ":".join([
+                           "!H",
+                           "!V",
+                           "NTrees=100",
+                           #"NTrees=1000",
+                           #"nEventsMin=150",
+                           "MaxDepth=3",
+                           "BoostType=AdaBoost",
+                           "AdaBoostBeta=0.5",
+                           "SeparationType=GiniIndex",
+                           "nCuts=-1",
+                           "PruneMethod=NoPruning",
+                           ]))
+
+
   if "Likelihood" in methods:
     factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood" + suffix,
                           ":".join([
@@ -197,7 +228,18 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
                            "!TransformOutput",
                            "PDFInterpol=Spline2",
                            #"NSmoothBkg[1]=10",
-                           "NSmooth=5",
+                           "NSmooth=4",
+                           "NAvEvtPerBin=10", #50
+                           ]))
+
+    factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood6" + suffix,
+                          ":".join([
+                           "H",
+                           "!V",
+                           "!TransformOutput",
+                           "PDFInterpol=Spline2",
+                           #"NSmoothBkg[1]=10",
+                           "NSmooth=6",
                            "NAvEvtPerBin=10", #50
                            ]))
 
