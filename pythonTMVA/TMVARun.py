@@ -189,35 +189,35 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
                            "PruneMethod=NoPruning",
                            ]))
 
-    factory.BookMethod(TMVA.Types.kBDT, "BDT200" + suffix,
-                       ":".join([
-                           "!H",
-                           "!V",
-                           "NTrees=200",
-                           #"NTrees=1000",
-                           #"nEventsMin=150",
-                           "MaxDepth=2",
-                           "BoostType=AdaBoost",
-                           "AdaBoostBeta=0.5",
-                           "SeparationType=GiniIndex",
-                           "nCuts=-1",
-                           "PruneMethod=NoPruning",
-                           ]))
+    # factory.BookMethod(TMVA.Types.kBDT, "BDT200" + suffix,
+    #                    ":".join([
+    #                        "!H",
+    #                        "!V",
+    #                        "NTrees=200",
+    #                        #"NTrees=1000",
+    #                        #"nEventsMin=150",
+    #                        "MaxDepth=2",
+    #                        "BoostType=AdaBoost",
+    #                        "AdaBoostBeta=0.5",
+    #                        "SeparationType=GiniIndex",
+    #                        "nCuts=-1",
+    #                        "PruneMethod=NoPruning",
+    #                        ]))
 
-    factory.BookMethod(TMVA.Types.kBDT, "BDT3" + suffix,
-                       ":".join([
-                           "!H",
-                           "!V",
-                           "NTrees=100",
-                           #"NTrees=1000",
-                           #"nEventsMin=150",
-                           "MaxDepth=3",
-                           "BoostType=AdaBoost",
-                           "AdaBoostBeta=0.5",
-                           "SeparationType=GiniIndex",
-                           "nCuts=-1",
-                           "PruneMethod=NoPruning",
-                           ]))
+    # factory.BookMethod(TMVA.Types.kBDT, "BDT3" + suffix,
+    #                    ":".join([
+    #                        "!H",
+    #                        "!V",
+    #                        "NTrees=100",
+    #                        #"NTrees=1000",
+    #                        #"nEventsMin=150",
+    #                        "MaxDepth=3",
+    #                        "BoostType=AdaBoost",
+    #                        "AdaBoostBeta=0.5",
+    #                        "SeparationType=GiniIndex",
+    #                        "nCuts=-1",
+    #                        "PruneMethod=NoPruning",
+    #                        ]))
 
 
   if "Likelihood" in methods:
@@ -232,16 +232,16 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
                            "NAvEvtPerBin=10", #50
                            ]))
 
-    factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood6" + suffix,
-                          ":".join([
-                           "H",
-                           "!V",
-                           "!TransformOutput",
-                           "PDFInterpol=Spline2",
-                           #"NSmoothBkg[1]=10",
-                           "NSmooth=6",
-                           "NAvEvtPerBin=10", #50
-                           ]))
+    # factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood6" + suffix,
+    #                       ":".join([
+    #                        "H",
+    #                        "!V",
+    #                        "!TransformOutput",
+    #                        "PDFInterpol=Spline2",
+    #                        #"NSmoothBkg[1]=10",
+    #                        "NSmooth=6",
+    #                        "NAvEvtPerBin=10", #50
+    #                        ]))
 
   if "SVM" in methods:
     factory.BookMethod(TMVA.Types.kSVM,"SVM" + suffix,
@@ -313,8 +313,8 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   if "MLP" in methods:
     factory.BookMethod(TMVA.Types.kMLP, "MLP" +suffix, "H:!V:NeuronType=tanh:VarTransform=N:NCycles=600:HiddenLayers=N+5:TestRate=5:!UseRegulator")
 
-  if "ANN" in methods:
-     factory.BookMethod(TMVA.Types.kCFMlpANN, "CFMlpANN", "!H:!V:NCycles=2000:HiddenLayers=N+1,N" )
+  if "CFMlpANN" in methods:
+     factory.BookMethod(TMVA.Types.kCFMlpANN, "CFMlpANN" + suffix, "!H:!V:NCycles=2000:HiddenLayers=N+1,N" )
 
   #if "CutsGA" in methods:
   doCutsGA = True #do as default for comparison in ROC curve
@@ -502,7 +502,7 @@ INPUTVARS = ['l1pt','TransMass3','baldiff','ColinSoper','l1Err','l2Err','CMsinth
 INPUTVARS_ZZvsBKGD = INPUTVARS
 
 #METHODS = ["KNN","BDT","Likelihood","Fisher"]
-METHODS = ["ANN","MLP","SVM","Likelihood","BDT"]
+METHODS = ["CFMlpANN","MLP","SVM","Likelihood","BDT"]
 
 #inputdir = "/tmp/chasco/INIT/HADD/TMVA/" #automate this, and the hadding
 #inputdir = "/afs/cern.ch/work/c/chasco/WDS_7/"
@@ -592,10 +592,10 @@ for sb in SBpairs:
 
 #inputfileslist=['ZH125.root','ZZ.root']
 
-# outputdir = inputdir + "OUT_v2/"
-# os.system("mkdir "+outputdir)
-# for a in inputfileslistorig:
-#   MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV,4)
+outputdir = inputdir + "OUT_v2/"
+os.system("mkdir "+outputdir)
+for a in inputfileslistorig:
+  MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV,4)
 
 
 ##############################################################################################
