@@ -102,7 +102,11 @@ def MakeTTPlot(a_file,treename,variable,outputname,sigcut,bkgdcut):
   c5.Print(outputname)
 
 #################################################################################################################### Testing training function
-def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,methods,energy):
+def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,methods,energy,RR):
+
+  weightexpression = weightexpression.replace("_replace",str(RR))
+  sigcut = sigcut.replace("_replace",str(RR))
+  bgcut = bgcut.replace("_replace",str(RR))
 
   inputvariables = inputfiles[2]
   
@@ -114,7 +118,7 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
   signame = inputfiles[0].split("/")[-1].replace('.root','')
   bkgdname = inputfiles[1].split("/")[-1].replace('.root','')
-  suffix = signame + "vs" + bkgdname + energy
+  suffix = signame + "vs" + bkgdname + energy + str(RR)
 
   NB = TInB.GetEntries()
   NS = TInS.GetEntries()
@@ -126,7 +130,7 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   # output file, just passing None to TMVA::Factory(..)
   # does not work. Make sure you don't overwrite an
   # existing file.
-  ffout = TFile("TMVA.root","RECREATE")
+  ffout = TFile("TMVA"+suffix+".root","RECREATE")
    
   factory = TMVA.Factory("TMVAClassification", ffout,
                               ":".join([
@@ -174,14 +178,14 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
                        ":".join([
                            "!H",
                            "!V",
-                           "NTrees=400",
+                           "NTrees=100",
                            #"NTrees=1000",
-                           "nEventsMin=150",
-                           "MaxDepth=3",
+                           #"nEventsMin=150",
+                           "MaxDepth=2",
                            "BoostType=AdaBoost",
                            "AdaBoostBeta=0.5",
                            "SeparationType=GiniIndex",
-                           "nCuts=20",
+                           "nCuts=-1",
                            "PruneMethod=NoPruning",
                            ]))
 
@@ -192,11 +196,19 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
                            "!V",
                            "!TransformOutput",
                            "PDFInterpol=Spline2",
-                           "NSmoothBkg[1]=10",
-                           "NSmooth=1",
-                           "NAvEvtPerBin=50",
+                           #"NSmoothBkg[1]=10",
+                           "NSmooth=5",
+                           "NAvEvtPerBin=10", #50
                            ]))
 
+  if "SVM" in methods:
+    factory.BookMethod(TMVA.Types.kSVM,"SVM" + suffix,
+      ":".join([
+        "!H",
+        "Gamma=0.25",
+        "Tol=0.001",
+        "VarTransform=Norm",
+        ]))
   
   # if "LikelihoodX" in methods:
   #   factory.BookMethod(TMVA.Types.kLikelihood, "LikelihoodNSmthB1" + suffix,
@@ -256,10 +268,14 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   if "HMatrix" in methods:
     factory.BookMethod( TMVA.Types.kHMatrix, "HMatrix" + suffix, "!H:!V" )
 
+  if "MLP" in methods:
+    factory.BookMethod(TMVA.Types.kMLP, "MLP" +suffix, "H:!V:NeuronType=tanh:VarTransform=N:NCycles=600:HiddenLayers=N+5:TestRate=5:!UseRegulator")
 
+  if "ANN" in methods:
+     factory.BookMethod(TMVA.Types.kCFMlpANN, "CFMlpANN", "!H:!V:NCycles=2000:HiddenLayers=N+1,N" )
 
   #if "CutsGA" in methods:
-  doCutsGA = False #do as default for comparison in ROC curve
+  doCutsGA = True #do as default for comparison in ROC curve
   if doCutsGA:
     print "&"*100
     factory.BookMethod( TMVA.Types.kCuts, "CutsGA" + suffix, "H:!V:FitMethod=GA:VarProp[1]=FMax:EffSel:Steps=30:Cycles=3:PopSize=400:SC_steps=10:SC_rate=5:SC_factor=0.95" ) #CutsGA
@@ -270,19 +286,21 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
   ffout.Close()
 
-  os.system("cp TMVA.root tmva/test/TMVA"+suffix+".root")
+  #os.system("cp TMVA.root tmva/test/TMVA"+suffix+".root")
+  os.system("cp TMVA"+suffix+".root tmva/test/")
 
   # if "BDT" in methods:
   #   MakeTTPlot("TMVA.root","TestTree","BDT","BDTtest.png","classID == 0","classID == 1")
   #   MakeTTPlot("TMVA.root","TrainTree","BDT","BDTtrain.png","classID == 0","classID == 1")
   maketheplots = True
-  if maketheplots:
-    for x in methods:
-      MakeTTPlot("TMVA.root","TestTree",x+suffix,x+suffix+"_test.png","(classID == 0)*weight","(classID == 1)*weight")
-      MakeTTPlot("TMVA.root","TrainTree",x+suffix,x+suffix+"_train.png","(classID == 0)*weight","(classID == 1)*weight")
+  # if maketheplots:
+  #   for x in methods:
+  #     MakeTTPlot("TMVA"+suffix+".root","TestTree",x+suffix,x+suffix+"_test.png","(classID == 0)*weight","(classID == 1)*weight")
+  #     MakeTTPlot("TMVA"+suffix+".root","TrainTree",x+suffix,x+suffix+"_train.png","(classID == 0)*weight","(classID == 1)*weight")
 
 ############################################################################################### Application function
-def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT,energy):
+def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT,energy,RR):
+  energy = energy + str(RR)
   #MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs)
   FInA = TFile.Open(inputdir + inputfile,"")
   TInA= FInA.Get(inputtree)
@@ -419,8 +437,8 @@ def MakeTrialFile(Twofiles):
 ############################################################################################### INPUTS FOR MVA
 
 #WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT" #may need to do cuts prior to this
-WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT"#*Wscale*Zscale"
-CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*(pBveto>0.0)*(training2>0.0)" #no raw booleans! put (bool > 0.0)
+WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT_replace"#*Wscale*Zscale"
+CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*(pBveto>0.0)*(training_replace>0.0)" #no raw booleans! put (bool > 0.0)
 #CUTTING = "training*(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*pBveto"
 
 # INPUTVARS = ['phil1met','phil2met','Thrust','DeltaPz','DeltaPhi_ZH','TransMass3','TransMass4','CScostheta','CMsintheta']
@@ -437,19 +455,19 @@ CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass 
 # INPUTVARS += INPUTVARSboost + INPUTVARSmt + INPUTVARSx
 # INPUTVARS_ZZvsBKGD = INPUTVARS + ['mass']
 #INPUTVARS = ['l1pt','TransMass3','l1Err','l2Err','CMsintheta','Boost11','Boost22','Theta_lab','DeltaPhi_ZH','phil2met','ZRapidity','CScostheta','l1l2metPt']
-INPUTVARS = ['zpt','TransMass3']
+INPUTVARS = ['l1pt','TransMass3','baldiff','ColinSoper','l1Err','l2Err','CMsintheta','Boost11','Boost22','Theta_lab','DeltaPhi_ZH','phil2met','ZRapidity','l1l2metPt']
 #INPUTVARS = ['TransMass3','mass','l1Err','l2Err','l1pt','DeltaPhi_ZH','Theta_lab','phil2met']
 INPUTVARS_ZZvsBKGD = INPUTVARS
 
 #METHODS = ["KNN","BDT","Likelihood","Fisher"]
-METHODS = ["Likelihood"]
+METHODS = ["ANN","MLP","SVM","Likelihood","BDT"]
 
 #inputdir = "/tmp/chasco/INIT/HADD/TMVA/" #automate this, and the hadding
 #inputdir = "/afs/cern.ch/work/c/chasco/WDS_7/"
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/"
-inputdir = "/afs/cern.ch/work/c/chasco/OCT18_p66_7/"
-TeV = "7"
-SkipLowStats = True
+inputdir = "/afs/cern.ch/work/c/chasco/OCT19_p66_8/"
+TeV = "8"
+SkipLowStats = False
 os.system("rm "+inputdir+"BKGDandZZ.root")
 os.system("rm "+inputdir+"BKGD.root")
 os.system("rm "+inputdir+"ZHcombo.root")
@@ -523,23 +541,19 @@ SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZZvsBKGD]]
 # print SBpairs
 
 for sb in SBpairs:
-  TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV)
+  for rr in range(5):
+    if (rr==4):
+      TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,rr)
 
 
 ########################################################################## APPLICATION
 
 #inputfileslist=['ZH125.root','ZZ.root']
 
-outputdir = inputdir + "OUT_v2/"
-os.system("mkdir "+outputdir)
-for a in inputfileslistorig:
-  MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
-
-
-# tmvaout = "/afs/cern.ch/work/c/chasco/WW_8/OUT_v2_TM3_mass/"
-# os.system("mkdir "+tmvaout)
-# os.system("cp "+outputdir+"*.root "+tmvaout)
-  #def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT):
+# outputdir = inputdir + "OUT_v2/"
+# os.system("mkdir "+outputdir)
+# for a in inputfileslistorig:
+#   MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV,4)
 
 
 ##############################################################################################
