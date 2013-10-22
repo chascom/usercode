@@ -15,8 +15,8 @@ import random
 syst = ["","_jerup","_jerdown","_jesup","_jesdown","_umetup","_umetdown","_lesup","_lesdown","_puup","_pudown","_btagup","_btagdown"]
 
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/OUT_v8_WR/"
-inputdir = "/afs/cern.ch/work/c/chasco/OCT17_7/OUT_v2/"
-TeV8 = False
+inputdir = "/afs/cern.ch/work/c/chasco/OCT19_p66_8/OUT_v2/"
+TeV8 = True
 os.system("mkdir v2")
 #outputdir = inputdir+"v8/"
 inputdirlist = os.listdir(inputdir)
@@ -27,12 +27,13 @@ for ii in inputdirlist:
 print inputdirlistroot
 
 WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)"#*Wscale*Zscale"
+WEIGHTINGT = "WT4" #application sample only
 CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*(pBveto>0.0)" #application sample only
-CUTTINGT = "WT*(training1<0.5)" #application sample only
+CUTTINGT = "(training4<0.1)" #application sample only
 EE = "(finstate > 1.5)"
 MM = "(finstate < 1.5)"
 
-VARS = ['LikelihoodZH125vsBKGDandZZ','TransMass3','zpt']
+VARS = ['LikelihoodZH125vsBKGDandZZ','BDTZH125vsBKGDandZZ','MLPZH125vsBKGDandZZ','SVMZH125vsBKGDandZZ','CFMlpANNZH125vsBKGDandZZ','TransMass3','l1pt']
 # bin = 10
 # _min = 0.0
 # _max = 1.0
@@ -44,14 +45,36 @@ for LEP in treeNameLEP:
 	treeName = LEP[0]
 
 	for v in VARS:
-
 		bin = 20
 		_min = 0.0
-		_max = 1.0
-		if (v=="zpt" or v=="mtzh"):
-			bin = 50
+		_max = 1000.0
+		if ("Likelihood" in v):
+			print "Likelihood"
+			bin = 20
 			_min = 0.0
-			_max = 1000.0
+			_max = 1.0
+		if ("BDT" in v):
+			print "BDT"
+			bin = 20
+			_min = -1.0
+			_max = 1.0
+		if ("SVM" in v):
+			print "SVM"
+			bin = 20
+			_min = 0.268
+			_max = 0.277
+		if ("MLP" in v):
+			print "MLP"
+			bin = 20
+			_min = -0.7
+			_max = 1.3
+		if ("CFMlpANN" in v):
+			print "CFMlpANN"
+			bin = 20
+			_min = 0.0
+			_max = 0.9
+
+
 
 
 		FileFF=TFile.Open("v2/"+v+"_"+LEP[1]+str(TeV8)+".root","RECREATE")
@@ -64,7 +87,8 @@ for LEP in treeNameLEP:
 		for f in inputdirlistroot:
 
 			n = f.replace(".root","")
-			tin = TFile.Open(inputdir+f,"READ").Get("tmvatree")
+			fin = TFile.Open(inputdir+f,"READ")
+			tin = fin.Get("tmvatree")
 			#print tin.GetEntries()
 			FallaDirectory.cd()
 
@@ -83,7 +107,8 @@ for LEP in treeNameLEP:
 					exec(n+s+'.Sumw2()')
 					#if (s == ""):
 					if "Likelihood" in v:
-						tin.Draw(v+">>"+n+s.replace("up","Up").replace("down","Down"),WEIGHTING+"*"+CUTTING+"*(sys"+s+">0.5)*"+LEP[2]+"*"+CUTTINGT)
+					#print "Likelihood! "*20
+						tin.Draw(v+">>"+n+s.replace("up","Up").replace("down","Down"),WEIGHTING+"*"+WEIGHTINGT+"*"+CUTTING+"*(sys"+s+">0.5)*"+LEP[2]+"*"+CUTTINGT)
 					else:
 						tin.Draw(v+">>"+n+s.replace("up","Up").replace("down","Down"),WEIGHTING+"*"+CUTTING+"*(sys"+s+">0.5)*"+LEP[2])
 					#else:
@@ -91,7 +116,8 @@ for LEP in treeNameLEP:
 					#print WEIGHTING+"*"+CUTTING+"*sys"+s+"*"+LEP[2]
 					exec(n+s+'.Write()')
 
-		HData.Write()
+			fin.Close()
 
+		HData.Write()
 		FileFF.Close()
 
