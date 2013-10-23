@@ -75,7 +75,7 @@ def card(signal,bkgd,Data,infile,VR,VU,VD):
 	tablelist.write("# Counting experiment with multiple channels\n")
 	tablelist.write("imax 1  number of channels\n")
 	tablelist.write("jmax "+str(len(bkgd))+"  number of backgrounds ('*' = automatic)\n")
-	tablelist.write("kmax "+str(12)+" number of nuisance parameters (sources of systematical uncertainties)\n")
+	tablelist.write("kmax "+str(14)+" number of nuisance parameters (sources of systematical uncertainties)\n") #14
 	tablelist.write("------------\n")
 	if CountingSyst and (not ShapeSyst):
 		tablelist.write("#Counting\n")
@@ -94,13 +94,30 @@ def card(signal,bkgd,Data,infile,VR,VU,VD):
 	tablelist.write("rate\t\t"+yieldstr+"\n")
 	tablelist.write("------------\n")
 
-	tablelist.write("lumi\tlnN\t"+IRSIG(["ALL"],1.044,allmcName)+"4.4% lumi uncertainty, affects signal and MC-driven background\n")
+	if ('True' in infile):
+		tablelist.write("lumi\tlnN\t"+IRSIG([signal[0][0],'ZZ','WZ'],[1.026,1.026,1.026],allmcName)+"lumi uncertainty, affects signal and MC-driven background\n")
+		tablelist.write("pdfqq\tlnN\t"+IRSIG([signal[0][0],'ZZ','WZ'],[1.101912,1.0312,1.0455],allmcName)+"pdf uncertainty\n")
+	else:
+		tablelist.write("lumi\tlnN\t"+IRSIG([signal[0][0],'ZZ','WZ'],[1.022,1.022,1.022],allmcName)+"lumi uncertainty, affects signal and MC-driven background\n")
+		tablelist.write("pdfqq\tlnN\t"+IRSIG([signal[0][0],'ZZ','WZ'],[1.104005,1.036,1.0502],allmcName)+"pdf uncertainty\n")
+
+	if ('MM' in infile):
+		tablelist.write("CMSeffmu\tlnN\t"+IRSIG([signal[0][0],'ZZ','WZ'],[1.04,1.04,1.04],allmcName)+"efficiency uncertainty\n")
+	else:
+		tablelist.write("CMSeffe\tlnN\t"+IRSIG([signal[0][0],'ZZ','WZ'],[1.03,1.03,1.03],allmcName)+"efficiency uncertainty\n")
+
+	tablelist.write("pdfqq\tlnN\t"+IRSIG([signal[0][0],'ZZ','WZ'],[1.055,1.057,1.048],allmcName)+"pdf uncertainty\n")
+	tablelist.write("QCDscaleVV\tlnN\t"+IRSIG(['ZZ','WZ'],[1.067,1.077],allmcName)+"QCD scale uncertainty\n")
+	tablelist.write("QCDscaleZH\tlnN\t"+IRSIG([signal[0][0]],[1.07],allmcName)+"QCD scale uncertainty\n")
+	tablelist.write("zlldata\tlnN\t"+IRSIG(['DYJets'],[2.00],allmcName)+"zll est. uncertainty\n")
+	tablelist.write("twjdata\tlnN\t"+IRSIG(['SingleT','WW','TTJets'],[1.25,1.25,1.25],allmcName)+"twj est. uncertainty\n")
+
 	DY = ['DYJetsToLL']
-	tablelist.write("ZtoLL\tlnN\t"+IRSIG(DY,1.10,allmcName)+"10% uncertainty on lumi*Z->ll\n")
-	tablelist.write("ZZ\tlnN\t"+IRSIG(['ZZ'],1.05,allmcName)+"5% uncertainty on ZZ\n")
-	tablelist.write("pdf\tlnN\t"+IRSIG(['WZ','ZZ',signal[0][0]],[1.026,1.018,1.018],allmcName)+"pdf\n")
-	tablelist.write("qcd\tlnN\t"+IRSIG(['WZ','ZZ',signal[0][0]],[1.121,1.067,1.059],allmcName)+"qcd\n")
-	tablelist.write(s[0]+"\tlnN\t"+IRSIG([s[0]],1.10,allmcName)+"10% uncertainty on ZH\n")
+	# tablelist.write("ZtoLL\tlnN\t"+IRSIG(DY,1.10,allmcName)+"10% uncertainty on lumi*Z->ll\n")
+	# tablelist.write("ZZ\tlnN\t"+IRSIG(['ZZ'],1.05,allmcName)+"5% uncertainty on ZZ\n")
+	# tablelist.write("pdf\tlnN\t"+IRSIG(['WZ','ZZ',signal[0][0]],[1.026,1.018,1.018],allmcName)+"pdf\n")
+	# tablelist.write("qcd\tlnN\t"+IRSIG(['WZ','ZZ',signal[0][0]],[1.121,1.067,1.059],allmcName)+"qcd\n")
+	# tablelist.write(s[0]+"\tlnN\t"+IRSIG([s[0]],1.10,allmcName)+"10% uncertainty on ZH\n")
 
 	if CountingSyst:
 		for v in range(len(VR)):
@@ -147,6 +164,16 @@ def card(signal,bkgd,Data,infile,VR,VU,VD):
 				Ratiostr = str(Ratio).replace('[','').replace(']','').replace(',','\t').replace("'","")
 
 				tablelist.write(v[0]+"\tshapeN2\t"+Ratiostr+"\n")
+	# ShapeSystSamples = ShapeSystSamples + ['DYJets','SingleT','TTJets','WW']
+	# for ss in ShapeSystSamples:
+	# 	wha = []
+	# 	for a in allmcName:
+	# 		if ss in a:
+	# 			wha.append(1)
+	# 		else:
+	# 			wha.append('-')
+	# 	whastr = str(wha).replace('[','').replace(']','').replace(',','\t').replace("'","")
+	# 	tablelist.write(ss + 'stat'+"\tshapeN2\t"+whastr+"\n")
 
 
 
