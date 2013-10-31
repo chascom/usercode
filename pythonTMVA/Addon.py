@@ -95,7 +95,12 @@ def AddMore(inputdir,inputfile,inputtree,outputdir,TeV8,SampleList):
 		tagalongvariables.append(y.GetName())
 	print tagalongvariables
 
-	addons = ['Wscale','Zscale','EWCorr','XS2','BR2']
+	#addons = ['Wscale','Zscale','EWCorr','XS2','BR2']
+	addons = ['etadiffBYllphi','ThetaBYllphi','llphiSUBZmetphi','metOVERl1pt','metPzptOVERl1ptPl2pt','metMl1pt']
+
+# 	INPUTVARS += ['(l1eta-l2eta)*(llphi)','Theta_lab*llphi','llphi-Zmetphi']#'Theta_lab*Zmetphi','llphi','Zmetphi','(l1eta-l2eta)*Zmetphi','(zeta-l1eta)*Zmetphi']#,'l1l2minusmetPt'] #'(zeta-l2eta)*(zphi-l2phi)','(l1eta-l2eta)*(l1phi-l2phi)*(l1pt-l2pt)'
+# INPUTVARS += ['(met/l1pt)','(met+zpt)/(l1pt+l2pt)']
+# INPUTVARS += ['(met-l1pt)']
 
 	for var in (tagalongvariables + addons):
   		exec(var+' = array.array(\'f\',[0])')
@@ -116,16 +121,22 @@ def AddMore(inputdir,inputfile,inputtree,outputdir,TeV8,SampleList):
 		for var in tagalongvariables:
 			exec(var+'[0] = TInA.'+var)
 
-		Wscale[0] = scale2data(inputfile,finstate[0],TeV8)[0]
-		Zscale[0] = scale2data(inputfile,finstate[0],TeV8)[1]
-		if ("ZH" in inputfile) or ("ZZ" in inputfile) or ("WZ" in inputfile):
-			EWCorr[0] = EWcorrection(inputfile,zpt,met)
-		else:
-			EWCorr[0] = 1.0
+		# Wscale[0] = scale2data(inputfile,finstate[0],TeV8)[0]
+		# Zscale[0] = scale2data(inputfile,finstate[0],TeV8)[1]
+		# if ("ZH" in inputfile) or ("ZZ" in inputfile) or ("WZ" in inputfile):
+		# 	EWCorr[0] = EWcorrection(inputfile,zpt,met)
+		# else:
+		# 	EWCorr[0] = 1.0
 
-		XSa = XSarc(inputfile,XS[0],BR[0],SampleList) #use old ZH cross sections, but keep new ones, so add XS2 and BR2
-		XS2[0] = XSa[0]
-		BR2[0] = XSa[1]
+		# XSa = XSarc(inputfile,XS[0],BR[0],SampleList) #use old ZH cross sections, but keep new ones, so add XS2 and BR2
+		# XS2[0] = XSa[0]
+		# BR2[0] = XSa[1]
+		etadiffBYllphi[0]=(l1eta[0]-l2eta[0])*(llphi[0])
+		ThetaBYllphi[0]=Theta_lab[0]*llphi[0]
+		llphiSUBZmetphi[0]=llphi[0]-Zmetphi[0]
+		metOVERl1pt[0]=(met[0]/l1pt[0])
+		metPzptOVERl1ptPl2pt[0]=(met[0]+zpt[0])/(l1pt[0]+l2pt[0])
+		metMl1pt[0]=(met[0]-l1pt[0])
 
 		TOut.Fill()
 	NN = TOut.GetEntries()
@@ -134,7 +145,7 @@ def AddMore(inputdir,inputfile,inputtree,outputdir,TeV8,SampleList):
 	FOut.Close()
 
 
-inputdir = "/afs/cern.ch/work/c/chasco/WW_7/"
+inputdir = "/afs/cern.ch/work/c/chasco/OCT19_p66_7/"
 En8 = False
 
 if En8:
@@ -142,7 +153,7 @@ if En8:
 else:
 	SampleList = SampleList7
 
-outputdir = inputdir + "Addon2/"
+outputdir = inputdir + "Addon/"
 os.system("mkdir "+outputdir)
 
 inputdirlist = os.listdir(inputdir)
