@@ -191,6 +191,8 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 	BIN3 = H.GetBinContent(3)
 
 	RND_CUT = 0.66
+	RND_CUTH = 0.5
+	RND_CUTR = 0.33
 
 	L1 = TLorentzVector() ####### causes function to be out of scope?!
 	L2 = TLorentzVector()
@@ -219,12 +221,17 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 	#print tagalongvariables
 
 	addinvariables = ['XS','BR','LUM','NGE','B2','B3','RND']#,'WT']
-	addinvariables += ['WT0','WT1','WT2','WT3','WT4']
-	addinvariables += ['training0','training1','training2','training3','training4']#,'Wscale','Zscale']
 	addinvariables += ['XS2','BR2']
+	addinvariables += ['WT0','WT1','WT2','WT3','WT4']
+	addinvariables += ['WTH0','WTH1','WTH2','WTH3','WTH4']
+	addinvariables += ['WTR0','WTR1','WTR2','WTR3','WTR4']
+	addinvariables += ['training0','training1','training2','training3','training4']#,'Wscale','Zscale']
+	addinvariables += ['trainingH0','trainingH1','trainingH2','trainingH3','trainingH4']
+	addinvariables += ['trainingR0','trainingR1','trainingR2','trainingR3','trainingR4']
 	addinvariables += ['phil1met','phil2met','Thrust','DeltaPz','DeltaPhi_ZH','TransMass3','TransMass4','CScostheta','CMsintheta']
 	addinvariables += ['Theta_lab','ZL1_Boost','ZL1_lab','ZL2_lab','ZRapidity','Lep2Dover3D','ZMEToverLep3D','ZMEToverLep2D','l1l2metPt','l1l2minusmetPt']
 	addinvariables += ['Boost11','Boost22','Boost12','Boost21']
+	addinvariables += ['etadiffBYllphi','ThetaBYllphi','llphiSUBZmetphi','metOVERl1pt','metPzptOVERl1ptPl2pt','metMl1pt','DeltaR']
 	#addinvariables += ['mt_max','mt_11','mt_22','mt_12','mt_21','qmet','qang']
 
 
@@ -283,6 +290,8 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 				for rr in range(5):
 					exec('training'+str(rr)+'[0]=0.0')
 					exec('WT'+str(rr)+'[0]=1.0')
+					exec('trainingH'+str(rr)+'[0]=0.0')
+					exec('WTH'+str(rr)+'[0]=1.0')
 				# Wscale[0] = 1.0
 				# Zscale[0] = 1.0
 			else:
@@ -305,12 +314,27 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 					# 	WT[0] = 1.0/(1.0-RND_CUT) #application
 						#training0[0]=0.0
 					for rr in range(5):
-						if (1.0*random.uniform(0,1) < RND_CUT):
+						if (1.0*random.uniform(0,1) < RND_CUT): #66-34
 							exec('training'+str(rr)+'[0]=1.0')
 							exec('WT'+str(rr)+'[0]=1.0/(RND_CUT)')
 						else:
 							exec('training'+str(rr)+'[0]=0.0')
 							exec('WT'+str(rr)+'[0]=1.0/(1.0-RND_CUT)')
+
+						if (1.0*random.uniform(0,1) < RND_CUTH): #50-50
+							exec('trainingH'+str(rr)+'[0]=1.0')
+							exec('WTH'+str(rr)+'[0]=1.0/(RND_CUTH)')
+						else:
+							exec('trainingH'+str(rr)+'[0]=0.0')
+							exec('WTH'+str(rr)+'[0]=1.0/(1.0-RND_CUTH)')
+
+
+						if (1.0*random.uniform(0,1) < RND_CUTR): #33-64
+							exec('trainingR'+str(rr)+'[0]=1.0')
+							exec('WTR'+str(rr)+'[0]=1.0/(RND_CUTR)')
+						else:
+							exec('trainingR'+str(rr)+'[0]=0.0')
+							exec('WTR'+str(rr)+'[0]=1.0/(1.0-RND_CUTR)')
 				else:
 					RND[0] = 1.0
 					#WT[0]=1.0
@@ -318,6 +342,10 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 					for rr in range(5):
 						exec('training'+str(rr)+'[0]=0.0')
 						exec('WT'+str(rr)+'[0]=1.0')
+						exec('trainingH'+str(rr)+'[0]=0.0')
+						exec('WTH'+str(rr)+'[0]=1.0')
+						exec('trainingR'+str(rr)+'[0]=0.0')
+						exec('WTR'+str(rr)+'[0]=1.0')
 
 
 			L1.SetPtEtaPhiM(l1pt[0],l1eta[0],l1phi[0],0)
@@ -360,6 +388,14 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 			l1l2metPt[0] = (L1+L2+MET).Pt()
 			l1l2minusmetPt[0] = (L1+L2).Pt() - (MET).Pt()
 
+			etadiffBYllphi[0]=abs(l1eta[0]-l2eta[0])*(llphi[0])
+			ThetaBYllphi[0]=Theta_lab[0]*llphi[0]
+			llphiSUBZmetphi[0]=llphi[0]-Zmetphi[0]
+			metOVERl1pt[0]=(met[0]/l1pt[0])
+			metPzptOVERl1ptPl2pt[0]=(met[0]+zpt[0])/(l1pt[0]+l2pt[0])
+			metMl1pt[0]=(met[0]-l1pt[0])
+			DeltaR[0] = math.sqrt((l1eta[0]-l2eta[0])**2 + (llphi[0])**2)
+
 			# mt2v = MT2(l1pt[0],l1eta[0],l1phi[0],l2pt[0],l2eta[0],l2phi[0],met[0],metphi[0])
 			# mt_max[0] = mt2v[0]
 			# mt_11[0] = mt2v[1]
@@ -387,7 +423,7 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 
 # WHICH ENERGY?
 TeV8 = True
-outputdir="/afs/cern.ch/work/c/chasco/OCT19_p66_8/"
+outputdir="/afs/cern.ch/work/c/chasco/NOV19_8/"
 
 SampleList = []
 SampleList1 = []
