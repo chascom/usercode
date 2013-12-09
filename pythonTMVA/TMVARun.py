@@ -1,6 +1,6 @@
 import os
 import sys
-sys.argv.append("-b")
+# sys.argv.append("-b")
 print '\nLoading ROOT ... \n\n'
 #import ROOT
 #from ROOT import TFile, TTree, TLorentzVector, kTRUE, TMath, TNtuple, gRandom, TCanvas, TH2F
@@ -41,6 +41,8 @@ def MakeTTPlot(a_file,treename,variable,outputname,sigcut,bkgdcut):
   hBg1=TH1F("hBg1","",bin,_min,_max)
   hSig2=TH1F("hSig2","",bin,_min,_max)
   hBg2=TH1F("hBg2","",bin,_min,_max)
+  hSigo=TH1F("hSigo","",bin,_min,_max)
+  hBgo=TH1F("hBgo","",bin,_min,_max)
 
   TestTree.Project("hSig1",variable,sigcut)
   TestTree.Project("hBg1",variable,bkgdcut)
@@ -53,6 +55,9 @@ def MakeTTPlot(a_file,treename,variable,outputname,sigcut,bkgdcut):
 
   TestTree.Project("hSig2",variable,sigcut)
   TestTree.Project("hBg2",variable,bkgdcut)
+
+  TestTree.Project("hSigo",variable,sigcut.replace("*weight",""))
+  TestTree.Project("hBgo",variable,bkgdcut.replace("*weight",""))
 
   #TestTree.Draw(variable+">>hSigE",sigcut.replace("*weight",""))  # signal
   #TestTree.Draw(variable+">>hBgE",bkgdcut.replace("*weight",""))  # background
@@ -68,6 +73,9 @@ def MakeTTPlot(a_file,treename,variable,outputname,sigcut,bkgdcut):
 
   ISc = hSig1.Integral()
   IBc = hBg1.Integral()
+
+  ISo = hSigo.Integral()
+  IBo = hBgo.Integral()
    
   hSig1.SetLineColor(kBlue) 
   hSig1.SetLineWidth(2)  # signal histogram
@@ -98,6 +106,8 @@ def MakeTTPlot(a_file,treename,variable,outputname,sigcut,bkgdcut):
   #leg.AddEntry(hBg1,str(IBE))
   leg.AddEntry(hSig1,str(ISc))
   leg.AddEntry(hBg1,str(IBc))
+  leg.AddEntry(hSig1,str(ISo))
+  leg.AddEntry(hBg1,str(IBo))
   leg.Draw("SAME")
   c5.Print(outputname)
 
@@ -124,6 +134,20 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   NS = TInS.GetEntries()
   print NS, NB, "INITIAL N" + "*"*20
 
+  GG = 0.8
+  PPP = 0.66
+  tNS = ((1.0*NS)/13.0)*PPP*GG
+  tNB = ((1.0*NB)/13.0)*PPP*GG
+  vNS = tNS*(1.0-GG)/GG
+  vNB = tNB*(1.0-GG)/GG
+  tNS = round(tNS)
+  tNB = round(tNB)
+  vNS = round(vNS)
+  vNB = round(vNB)
+
+  print tNS, tNB, "training sample sizes"
+  print vNS, vNB, "testing sample sizes"
+
   TMVA.Tools.Instance()
    
   # note that it seems to be mandatory to have an
@@ -146,9 +170,15 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
     exec('factory.AddVariable("'+var+'","F")')
   # factory.AddVariable("x","F")
   # factory.AddVariable("y","F")
-   
-  factory.AddSignalTree(TInS)
-  factory.AddBackgroundTree(TInB)
+
+  sigCut = TCut(sigcut) #cuts will be the same if sample per file
+  bgCut = TCut(bgcut)
+
+  TInS_cut = TInS.CopyTree(sigcut)
+  TInB_cut = TInB.CopyTree(bgcut)
+
+  factory.AddSignalTree(TInS_cut)
+  factory.AddBackgroundTree(TInB_cut)
 
   #add weights
   print weightexpression, "weightexpression "*20
@@ -159,26 +189,35 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   # factory.SetBackgroundWeightExpression("1.0")
    
   # cuts defining the signal and background sample
-  sigCut = TCut(sigcut) #cuts will be the same if sample per file
-  bgCut = TCut(bgcut)
-   
+
+  print "nTest_Signal="+str(tNS)
+  print "nTest_Background="+str(tNB)
+
+  # sigCut = TCut("(1)") #cuts will be the same if sample per file
+  # bgCut = TCut("(1)")
+
   factory.PrepareTrainingAndTestTree(sigCut,   # signal events
                                      bgCut,    # background events
                                      ":".join([
-                                          "nTrain_Signal=0",
-                                          "nTrain_Background=0",
+                                          "nTrain_Signal="+str(tNS),#0
+                                          "nTrain_Background="+str(tNB),#0
+                                          # "nTest_Signal="+str(tNS),
+                                          # "nTest_Background="+str(tNB),
+                                          #"SplitSeed=0",
                                           "SplitMode=Random",
+                                          #"NormMode=EqualNumEvents",
                                           #"NormMode=NumEvents",
                                           "NormMode=None",
                                           "!V"
                                          ]))
+
 
   if "BDT" in methods:
     factory.BookMethod(TMVA.Types.kBDT, "BDT" + suffix,
                        ":".join([
                            "!H",
                            "!V",
-                           "NTrees=100",
+                           "NTrees=200",
                            #"NTrees=1000",
                            #"nEventsMin=150",
                            "MaxDepth=2", #2
@@ -189,14 +228,31 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
                            "PruneMethod=NoPruning",
                            ]))
 
-    # factory.BookMethod(TMVA.Types.kBDT, "BDT300" + suffix,
+
+    #  if "BDT" in methods:
+    factory.BookMethod(TMVA.Types.kBDT, "BDT500" + suffix,
+                       ":".join([
+                           "!H",
+                           "!V",
+                           "NTrees=500",
+                           #"NTrees=1000",
+                           #"nEventsMin=150",
+                           "MaxDepth=2", #2
+                           "BoostType=AdaBoost",
+                           "AdaBoostBeta=0.5",
+                           "SeparationType=GiniIndex",
+                           "nCuts=-1",
+                           "PruneMethod=NoPruning",
+                           ]))
+
+    # factory.BookMethod(TMVA.Types.kBDT, "BDT2" + suffix,
     #                    ":".join([
     #                        "!H",
     #                        "!V",
     #                        "NTrees=200",
     #                        #"NTrees=1000",
     #                        #"nEventsMin=150",
-    #                        "MaxDepth=2",
+    #                        "MaxDepth=2", #2
     #                        "BoostType=AdaBoost",
     #                        "AdaBoostBeta=0.5",
     #                        "SeparationType=GiniIndex",
@@ -204,16 +260,14 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
     #                        "PruneMethod=NoPruning",
     #                        ]))
 
-
-
-    # factory.BookMethod(TMVA.Types.kBDT, "BDT400" + suffix,
+    # factory.BookMethod(TMVA.Types.kBDT, "BDT3" + suffix,
     #                    ":".join([
     #                        "!H",
     #                        "!V",
-    #                        "NTrees=400",
+    #                        "NTrees=100",
     #                        #"NTrees=1000",
     #                        #"nEventsMin=150",
-    #                        "MaxDepth=2",
+    #                        "MaxDepth=3", #2
     #                        "BoostType=AdaBoost",
     #                        "AdaBoostBeta=0.5",
     #                        "SeparationType=GiniIndex",
@@ -223,121 +277,52 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
 
   if "Likelihood" in methods:
-    factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood" + suffix,
+    SMOOTH = ['0','1','2','3','4','5','6','9','10']
+    NBINS = ['15','20','25','30']
+    NA = ['10','25','50','100']
+    for sm in SMOOTH:
+      for nb in NBINS:
+        factory.BookMethod(TMVA.Types.kLikelihood, "Likelihoodbin" + sm + nb + suffix,
                           ":".join([
                            "H",
                            "!V",
+                           "VarTransform=None",
                            "!TransformOutput",
                            "PDFInterpol=Spline2",
                            #"NSmoothBkg[1]=10",
-                           "NSmooth=4",
-                           "NAvEvtPerBin=10", #50
+                           "NSmooth="+sm,
+                           "Nbins="+nb
+                           #"NAvEvtPerBin=25", #50
+                           ]))
+      for na in NA:
+        factory.BookMethod(TMVA.Types.kLikelihood, "Likelihoodevt" + sm + na + suffix,
+                          ":".join([
+                           "H",
+                           "!V",
+                           "VarTransform=None",
+                           "!TransformOutput",
+                           "PDFInterpol=Spline2",
+                           #"NSmoothBkg[1]=10",
+                           "NSmooth="+sm,
+                           #"Nbins="+nb
+                           "NAvEvtPerBin="+na, #50
                            ]))
 
-    # factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood420" + suffix,
-    #                       ":".join([
-    #                        "H",
-    #                        "!V",
-    #                        "!TransformOutput",
-    #                        "PDFInterpol=Spline2",
-    #                        #"NSmoothBkg[1]=10",
-    #                        "NSmooth=4",
-    #                        "NAvEvtPerBin=20", #50
-    #                        ]))
 
-    # factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood310" + suffix,
-    #                       ":".join([
-    #                        "H",
-    #                        "!V",
-    #                        "!TransformOutput",
-    #                        "PDFInterpol=Spline2",
-    #                        #"NSmoothBkg[1]=10",
-    #                        "NSmooth=3",
-    #                        "NAvEvtPerBin=10", #50
-    #                        ]))
 
-    # factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood210" + suffix,
-    #                       ":".join([
-    #                        "H",
-    #                        "!V",
-    #                        "!TransformOutput",
-    #                        "PDFInterpol=Spline2",
-    #                        #"NSmoothBkg[1]=10",
-    #                        "NSmooth=2",
-    #                        "NAvEvtPerBin=10", #50
-    #                        ]))
-
-    # factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood1010" + suffix,
-    #                       ":".join([
-    #                        "H",
-    #                        "!V",
-    #                        "!TransformOutput",
-    #                        "PDFInterpol=Spline2",
-    #                        #"NSmoothBkg[1]=10",
-    #                        "NSmooth=10",
-    #                        "NAvEvtPerBin=10", #50
-    #                        ]))
-
-    # factory.BookMethod(TMVA.Types.kLikelihood, "Likelihood1020" + suffix,
-    #                       ":".join([
-    #                        "H",
-    #                        "!V",
-    #                        "!TransformOutput",
-    #                        "PDFInterpol=Spline2",
-    #                        #"NSmoothBkg[1]=10",
-    #                        "NSmooth=10",
-    #                        "NAvEvtPerBin=20", #50
-    #                        ]))
+    ###############################################################################
 
 
   if "SVM" in methods:
     factory.BookMethod(TMVA.Types.kSVM,"SVM" + suffix,
       ":".join([
         "!H",
-        "Gamma=0.25",
-        "Tol=0.001",
+        "C=1000",
+        #"Kernel=Linear",
+        "Gamma=1",
+        "Tol=0.01",
         "VarTransform=Norm",
         ]))
-  
-  # if "LikelihoodX" in methods:
-  #   factory.BookMethod(TMVA.Types.kLikelihood, "LikelihoodNSmthB1" + suffix,
-  #                         ":".join([
-  #                          "H",
-  #                          "!V",
-  #                          "!TransformOutput",
-  #                          "PDFInterpol=Spline2",
-  #                          "NSmoothBkg[1]=10",
-  #                          "NSmooth=1",
-  #                          "NAvEvtPerBin=50",
-  #                          ]))
-
-  #   if "LikelihoodX" in methods:
-  #   factory.BookMethod(TMVA.Types.kLikelihood, "LikelihoodNSmthS0B0" + suffix,
-  #                         ":".join([
-  #                          "H",
-  #                          "!V",
-  #                          "!TransformOutput",
-  #                          "PDFInterpol=Spline2",
-  #                          "NSmoothSig[0]=20",
-  #                          "NSmoothBkg[0]=20",
-  #                          #"NSmoothBkg[1]=10",
-  #                          "NSmooth=1",
-  #                          "NAvEvtPerBin=50",
-  #                          ]))
-
-  #     if "LikelihoodX" in methods:
-  #   factory.BookMethod(TMVA.Types.kLikelihood, "LikelihoodNSmthS0B0B1" + suffix,
-  #                         ":".join([
-  #                          "H",
-  #                          "!V",
-  #                          "!TransformOutput",
-  #                          "PDFInterpol=Spline2",
-  #                          "NSmoothSig[0]=20",
-  #                          "NSmoothBkg[0]=20",
-  #                          "NSmoothBkg[1]=10",
-  #                          "NSmooth=1",
-  #                          "NAvEvtPerBin=50",
-  #                          ]))
 
   if "Fisher" in methods:
     factory.BookMethod(TMVA.Types.kFisher, "Fisher" + suffix,
@@ -364,7 +349,7 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
      factory.BookMethod(TMVA.Types.kCFMlpANN, "CFMlpANN" + suffix, "!H:!V:NCycles=2000:HiddenLayers=N+1,N" )
 
   #if "CutsGA" in methods:
-  doCutsGA = True #do as default for comparison in ROC curve
+  doCutsGA = False #do as default for comparison in ROC curve
   if doCutsGA:
     print "&"*100
     factory.BookMethod( TMVA.Types.kCuts, "CutsGA" + suffix, "H:!V:FitMethod=GA:VarProp[1]=FMax:EffSel:Steps=30:Cycles=3:PopSize=400:SC_steps=10:SC_rate=5:SC_factor=0.95" ) #CutsGA
@@ -381,15 +366,15 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   # if "BDT" in methods:
   #   MakeTTPlot("TMVA.root","TestTree","BDT","BDTtest.png","classID == 0","classID == 1")
   #   MakeTTPlot("TMVA.root","TrainTree","BDT","BDTtrain.png","classID == 0","classID == 1")
-  maketheplots = True
-  # if maketheplots:
-  #   for x in methods:
-  #     MakeTTPlot("TMVA"+suffix+".root","TestTree",x+suffix,x+suffix+"_test.png","(classID == 0)*weight","(classID == 1)*weight")
-  #     MakeTTPlot("TMVA"+suffix+".root","TrainTree",x+suffix,x+suffix+"_train.png","(classID == 0)*weight","(classID == 1)*weight")
+  maketheplots = False
+  if maketheplots:
+    for x in methods:
+      MakeTTPlot("TMVA"+suffix+".root","TrainTree",x+suffix,x+suffix+"_train.png","(classID == 0)*weight","(classID == 1)*weight")
+      MakeTTPlot("TMVA"+suffix+".root","TestTree",x+suffix,x+suffix+"_test.png","(classID == 0)*weight","(classID == 1)*weight")
+      
 
 ############################################################################################### Application function
-def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT,energy,RR):
-  energy = energy + str(RR)
+def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT,energy):
   #MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs)
   FInA = TFile.Open(inputdir + inputfile,"")
   TInA= FInA.Get(inputtree)
@@ -426,23 +411,46 @@ def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT
     if var not in discriminatingvariables_spent:
       exec(var+' = array.array(\'f\',[0])')
 
+  weightsdir = "weights/"
+  WD = os.listdir(weightsdir)
+  outputDs = []
+  for wfile in WD:
+    if (".xml" not in wfile):
+      continue
+    if (energy not in wfile):
+      continue
+    for sbv in sigfilesfromTT:
+      SvsB = sbv[0].replace('.root','')+'vs'+sbv[1].replace('.root','')
+      for m in methods: #maybe couple "methods" to "sbv", if methods vary over sbv: #sbv[2]
+        if (m in wfile) and (SvsB in wfile):
+          # outD = wfile.split(".weights.")[0].split("TMVAClassification_")[0]
+          outD = wfile.replace("TMVAClassification_","").replace(".weights.xml","")
+          if (outD[-2]=="8") or (outD[-2] == "7"):
+            outD = outD.replace("8","r").replace("7","r") #erase energy tag
+          print outD, ">#"*100
+          outputDs.append(outD)
+          exec("reader"+SvsB+".BookMVA('"+outD+"','weights/"+wfile+"')")
 
-  for sbv in sigfilesfromTT:
-    SvsB = sbv[0].replace('.root','')+'vs'+sbv[1].replace('.root','')
-    for m in methods: #maybe couple "methods" to "sbv", if methods vary over sbv: #sbv[2]
-      exec("reader"+SvsB+".BookMVA('"+m+SvsB+"','weights/TMVAClassification_"+m+SvsB+energy+".weights.xml')")
-
+  # for sbv in sigfilesfromTT:
+  #   SvsB = sbv[0].replace('.root','')+'vs'+sbv[1].replace('.root','')
+  #   for m in methods: #maybe couple "methods" to "sbv", if methods vary over sbv: #sbv[2]
+  #     exec("reader"+SvsB+".BookMVA('"+m+SvsB+"','weights/TMVAClassification_"+m+SvsB+energy+".weights.xml')")
 
   #FOut = TFile.Open(inputfile.replace('.root','new.root'),"RECREATE")
   FOut = TFile.Open(outputdir + inputfile,"RECREATE")
 
   TOut = TTree("tmvatree","tmvatree")
 
-  for sbv in sigfilesfromTT:
-    SvsB = sbv[0].replace('.root','')+'vs'+sbv[1].replace('.root','')
-    for m in methods:
-      exec(m+SvsB+' = array.array("f",[0])')
-      exec("TOut.Branch('"+m+SvsB+"', "+m+SvsB+",'"+m+SvsB+"/F')")
+  # for sbv in sigfilesfromTT:
+  #   SvsB = sbv[0].replace('.root','')+'vs'+sbv[1].replace('.root','')
+  #   for m in methods:
+  #     exec(m+SvsB+' = array.array("f",[0])')
+  #     exec("TOut.Branch('"+m+SvsB+"', "+m+SvsB+",'"+m+SvsB+"/F')")
+
+  for outD in outputDs:
+    exec(outD+' = array.array("f",[0])')
+    exec("TOut.Branch('"+outD+"', "+outD+",'"+outD+"/F')")
+
 
   for var in tagalongvariables: #add tag-alongs to output tree
     exec("TOut.Branch('"+var+"', "+var+",'"+var+"/F')")
@@ -459,10 +467,13 @@ def MVAApplication(inputfile,inputtree,methods,inputdir,outputdir,sigfilesfromTT
     for var in tagalongvariables:
       exec(var+'[0] = TInA.'+var)
 
-    for sbv in sigfilesfromTT:
-      SvsB = sbv[0].replace('.root','')+'vs'+sbv[1].replace('.root','')
-      for m in methods: #sbv[2]
-        exec(m+SvsB+"[0] = reader"+SvsB+".EvaluateMVA('"+m+SvsB+"')")
+    for outD in outputDs:
+      exec(outD+"[0] = reader"+SvsB+".EvaluateMVA('"+outD+"')")
+
+    # for sbv in sigfilesfromTT:
+    #   SvsB = sbv[0].replace('.root','')+'vs'+sbv[1].replace('.root','')
+    #   for m in methods: #sbv[2]
+    #     exec(m+SvsB+"[0] = reader"+SvsB+".EvaluateMVA('"+m+SvsB+"')")
 
     TOut.Fill()
 
@@ -546,25 +557,31 @@ CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass 
 # INPUTVARS_ZZvsBKGD = INPUTVARS + ['mass']
 #INPUTVARS = ['l1pt','TransMass3','l1Err','l2Err','CMsintheta','Boost11','Boost22','Theta_lab','DeltaPhi_ZH','phil2met','ZRapidity','CScostheta','l1l2metPt']
 #INPUTVARS = ['l1pt','l2pt','TransMass3','REDmetmetphi','l1Err','l2Err','Lep2Dover3D','ZMEToverLep3D','l1l2minusmetPt','baldiff','ColinSoper','CMsintheta','Boost11','Boost22','Theta_lab','DeltaPhi_ZH','phil2met','ZRapidity','l1l2metPt','ZL2_lab','ZL1_lab','ZL1_Boost']
-INPUTVARS = ['l2pt','TransMass3','DeltaPhi_ZH','ZL2_lab']#'ColinSoper','phil2met'] #'l1Err','l2Err'
+INPUTVARS = ['l2pt','TransMass3','DeltaPhi_ZH']#'ColinSoper','phil2met'] #'l1Err','l2Err'
 #INPUTVARS += ['ZL2_lab']#,'Boost11']#'CMsintheta','baldiff','ZRapidity'
-INPUTVARS += ['etadiffBYllphi','ThetaBYllphi','llphiSUBZmetphi','metOVERl1pt','metPzptOVERl1ptPl2pt','metMl1pt']
-
+INPUTVARS += ['fabs(etadiffBYllphi)','ThetaBYllphi','llphiSUBZmetphi','metPzptOVERl1ptPl2pt','metMl1pt']#,'(llphi + Zmetphi)','(llphi*Zmetphi)']#,'metMl1pt' 'metOVERl1pt'
+INPUTVARS += ['fabs(l1eta-l2eta)','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llphi)',"llphi"]
 # INPUTVARS += ['(l1eta-l2eta)*(llphi)','Theta_lab*llphi','llphi-Zmetphi']#,'Theta_lab*Zmetphi']#'Theta_lab*Zmetphi','llphi','Zmetphi','(l1eta-l2eta)*Zmetphi','(zeta-l1eta)*Zmetphi']#,'l1l2minusmetPt'] #'(zeta-l2eta)*(zphi-l2phi)','(l1eta-l2eta)*(l1phi-l2phi)*(l1pt-l2pt)'
 # INPUTVARS += ['(met-l1pt)']#'(zpt/l1pt)','(l1pt-l2pt)','(met-l2pt)','(zpt-met)','(zpt-l2pt)']'(zpt-l1pt)'
 # #INPUTVARS += ['(l1pt*(l1phi-metphi)-l2pt*(l2phi-metphi))','(l1pt*(l1phi-zphi)-l2pt*(l2phi-zphi))','(l1pt*(l1phi-zphi)-l2pt*(l2phi-zphi))','(l1pt*(l1eta-zeta)-l2pt*(l2eta-zeta))']
 # INPUTVARS += ['(met/l1pt)','(met+zpt)/(l1pt+l2pt)']#'(l1pt/l2pt)','(met/l2pt)','(zpt/met)','(zpt/l2pt)']'(met-zpt)/(l1pt-l2pt+0.001)'
 # #INPUTVARS += ['(Zmetphi)/(llphi+0.001)']#,'l1pt+l2pt+met','zpt+met']#,'(l1pt+l2pt)/zpt','(l1pt+l2pt+met)/(zpt+met)']
 # #INPUTVARS = ['TransMass3','mass','l1Err','l2Err','l1pt','DeltaPhi_ZH','Theta_lab','phil2met']
-INPUTVARS_ZZvsBKGD = INPUTVARS
-
+#INPUTVARS_ZZvsBKGD = INPUTVARS
+#INPUTVARS_ZZvsBKGD = ['TransMass3','Zmetphi','fabs(etadiffBYllphi)','llphiSUBZmetphi','metPzptOVERl1ptPl2pt','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llphi)','l2pt','metMl1pt']
+# INPUTVARS_ZZvsBKGD = ['zpt','etadiffBYllphi','ThetaBYllphi','metOVERl1pt','metPzptOVERl1ptPl2pt','DeltaR'] #'Theta_lab'
+# INPUTVARS_ZZvsBKGD += ['llphiSUBZmetphi']#'Boost11','Boost22',
+INPUTVARS_ZZvsBKGD = ["zpt",'etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR*DeltaR-2*etadiffBYllphi']#,'metPzptOVERl1ptPl2pt','Zmetphi*met/zpt','(met+zpt)','(l1pt+l2pt)','(l1pt+l2pt+met)','(l1pt+l2pt)/zpt']#,'DeltaR'] #'Theta_lab'
+# INPUTVARS_ZZvsBKGD += ['llphiSUBZmetphi',"Boost22"]#'Boost11','Boost22',
+# #INPUTVARS_ZZvsBKGD += ['ZRapidity']
+#['Lep2Dover3D','ZMEToverLep3D','ZMEToverLep2D','l1l2metPt','l1l2minusmetPt','ZL2_lab','ZL1_lab','ZL1_Boost','metMl1pt',''llphiSUBZmetphi'']
 #METHODS = ["KNN","BDT","Likelihood","Fisher"]
-METHODS = ["Likelihood","BDT"]#,"CFMlpANN","MLP","SVM"]
+METHODS = ["Likelihood"]#,"BDT"]#,"SVM"]#,"CFMlpANN","MLP","SVM"]
 
 #inputdir = "/tmp/chasco/INIT/HADD/TMVA/" #automate this, and the hadding
 #inputdir = "/afs/cern.ch/work/c/chasco/WDS_7/"
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/"
-inputdir = "/afs/cern.ch/work/c/chasco/OCT19_p66_7/Addon/"
+inputdir = "/afs/cern.ch/work/c/chasco/NOV19_7/"
 TeV = "7"
 SkipLowStats = True
 os.system("rm "+inputdir+"BKGDandZZ.root")
@@ -637,11 +654,13 @@ SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZZvsBKGD]]
 # SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZHvsALL]]
 # SBpairs += [["ZHcombo.root","BKGDandZZ.root",INPUTVARS_ZHvsALL]]
 
-# print SBpairs
+print SBpairs
+os.system("rm weights/TMVA*"+TeV+"*.weights.xml") #Remove previously existing weights
+os.system("rm weights/TMVA*"+TeV+"*.class.C")
 
 for sb in SBpairs:
   for rr in range(5):
-    if (rr==4):
+    if (rr==3):
       TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,rr)
   #TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,3)
   #TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,4)
@@ -649,11 +668,10 @@ for sb in SBpairs:
 ########################################################################## APPLICATION
 
 #inputfileslist=['ZH125.root','ZZ.root']
-
-outputdir = inputdir + "OUT_v10/"
+outputdir = inputdir + "OUT_vt3/"
 os.system("mkdir "+outputdir)
 for a in inputfileslistorig:
-  MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV,4)
+  MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
 
 
 ##############################################################################################
