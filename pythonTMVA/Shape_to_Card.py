@@ -199,7 +199,7 @@ def card(signal,bkgd,Data,infile,VR,VU,VD):
 # sdir = "ShapeFiles/H8__TMVA2/"
 #sdir = "ShapeFiles/H7__SIMP/"
 #sdir = "ShapeFiles/H8__WR/"
-sdir = "v2/"
+sdir = "/afs/cern.ch/work/c/chasco/RJS/CMSSW_5_3_3_patch2/src/CMGTools/HtoZZ2l2nu/TMVA/v4/"
 countshape = "shape"
 # sdir = "combined/"
 # sdir = "ShapeFiles/H8__newold/"
