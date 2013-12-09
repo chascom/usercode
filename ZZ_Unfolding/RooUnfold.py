@@ -1,15 +1,6 @@
 #!/usr/bin/env python
-# ==============================================================================
-# File and Version Information:
-# $Id: RooUnfoldExample.py 302 2011-09-30 20:39:20Z T.J.Adye $
-#
-# Description:
-# Simple example usage of the RooUnfold package using toy MC.
-#
-# Author: Tim Adye <T.J.Adye@rl.ac.uk>
-#
-# ==============================================================================
-
+import os
+import sys
 from ROOT import gRandom, TH1, TH1D, cout, gROOT
 
 gROOT.LoadMacro("RooUnfold-1.1.1/libRooUnfold.so")
@@ -28,20 +19,74 @@ from ROOT import *
 
 ROOT.gStyle.SetOptStat(0)
 
-
 # ==============================================================================
-# Gaussian smearing, systematic translation, and variable inefficiency
+# Histogram functions
 # ==============================================================================
 
-def smear(xt):
-    # efficiency
-    xeff= 0.3 + (1.0-0.3)/20.0*(xt+10.0)
-    x= gRandom.Rndm()
-    if x > xeff:
-        return None
-    # bias and smear
-    xsmear= gRandom.Gaus( -2.5, 0.2 )
-    return xt+xsmear
+def Make2DPlot(a_file,treename,variablepair,binsx,binsy,outputname,cut):
+  c5 = TCanvas("c5")
+  gStyle.SetOptStat(0)
+  # c5.SetLogx()
+  # c5.SetLogy()
+  c5.SetLogz()
+  #gStyle->SetOptStat(1111111)
+
+  FIn = TFile.Open(a_file,"READ")
+  TestTree = FIn.Get(treename)
+  NNN = TestTree.GetEntries()
+
+  c = TChain(treename)
+  c.Add(a_file)
+  for variable in variablepair:
+    # exec('min_'+variable+' = 0.95*c.GetMinimum(variable)')
+    # exec('max_'+variable+' = 1.05*c.GetMaximum(variable)')
+    exec('min_'+variable+' = 0.0')
+    exec('max_'+variable+' = 800.0')
+    exec('print min_'+variable+', max_'+variable)
+
+  print NNN, "entries"
+
+  exec('hSig1=TH2F("hSig1","Unfolding Matrix",binsx,min_'+variablepair[1]+',max_'+variablepair[1]+',binsy,min_'+variablepair[0]+',max_'+variablepair[0]+')')
+  TestTree.Project('hSig1',variablepair[0]+':'+variablepair[1],cut)
+  hSig1.Draw("COLZ")
+  hSig1.GetYaxis().SetTitle("GEN PT")
+  hSig1.GetYaxis().SetTitleOffset(1.5)
+  hSig1.GetXaxis().SetTitle("RECO PT")
+
+  exec('line2 = TLine(0,0,max_'+variablepair[0]+',max_'+variablepair[0]+')') #xy,xy
+  line2.Draw("SAME")
+
+
+  # c5.Print(outputname)
+  return hSig1
+
+def Make1DPlot(a_file,treename,variable,bin,outputname,cuts):
+  c5 = TCanvas("c5")
+
+  FIn = TFile.Open(a_file,"READ")
+  TestTree = FIn.Get(treename)
+  NNN = TestTree.GetEntries()
+
+  c = TChain(treename)
+  c.Add(a_file)
+  # min_ = 0.95*c.GetMinimum(variable)
+  # max_ = 1.05*c.GetMaximum(variable)
+  min_ = 0.0
+  max_ = 800.0
+
+  print NNN, "entries"
+
+  hSig1=TH1F("hSig1","",bin,min_,max_)
+
+  TestTree.Project("hSig1",variable,"")
+  hSig1.GetXaxis().SetTitle(variable)
+  hSig1.SetMaximum(1.2*hSig1.GetMaximum())
+  hSig1.SetMinimum(0.0)
+  hSig1.Draw()
+
+  # c5.Print(outputname)
+
+  return hSig1
 
 # ==============================================================================
 # Example Unfolding
@@ -58,86 +103,32 @@ def main( optunf="Bayes" ):
 
     #c2 = TCanvas("c2")
     print "==================================== TRAIN ===================================="
-    # Create response matrix object for 40 measured and 20
-    # unfolded bins:
-    #response= RooUnfoldResponse( 40, -10.0, 10.0, 20, -10.0, 10.0 )
-    response= RooUnfoldResponse( 10, 0.0, 800.0, 10, 0.0, 800.0 )
-    response = RooUnfoldResponse (MCRecoHisto, MCGenHisto, GenVsReco2DHisto)
+    # Create response matrix object
     inputdir = "/afs/cern.ch/work/c/chasco/RJS/CMSSW_5_3_3_patch2/src/CMGTools/HtoZZ2l2nu/test/results/"
-    # Train with a Breit-Wigner, mean 0.3 and width 2.5.
-    fin = TFile.Open(inputdir+"ZZ8H.root","READ")
-    tin = fin.Get("finalTree")
-    N = tin.GetEntries()
-    print N, "entries"
-    misses = 0
-    fakes = 0
-    for n in range(N):
-        #if (n%1000 == 1) or (n+1==N):
-            #print str(n+1) +' of '+str(N) +' events evaluated.'
-        tin.GetEntry(n)
-        if (tin.zpt > 40.0) and (tin.zptG > 20.0):
-            response.Fill(tin.zpt, tin.zptG)
-        else:
-            if (tin.zptG > 20.0):
-                response.Miss(tin.zptG)
-                misses +=1
-            if (tin.zpt > 40.0):
-                response.Fake(tin.zpt)
-                fakes +=1
-    print "misses:",misses, 100.0*misses/(1.0*N), "%"
-    print "fakes:", fakes, 100.0*fakes/(1.0*N), "%"
+    # os.system("rm "+inputdir+"ZZ8H.root")
+    # os.system("hadd "+inputdir+"ZZ8H.root "+inputdir+"*8TeV*ZZ*.root")
+    PAIR = ['zptG','zpt']
+    outputnameGR = PAIR[0]+'_vs_'+PAIR[1]+'.png'
+    outputnameG = PAIR[0]+'.png'
+    outputnameR = PAIR[1]+'.png'
+    cutG = ""
+    cutR = ""
+    cutGR = ""
 
-    c1 = TCanvas("c1")
-    #c1.SetLogy()
-    pad1 = TPad( 'pad1', 'pad1', 0.0, 0.15, 1.0, 1.0 )#divide canvas into pads
-    pad2 = TPad( 'pad2', 'pad2', 0.0, 0.0, 1.0, 0.15)
-    pad1.Draw()
-    pad2.Draw()
+    GenVsReco2DHisto = Make2DPlot(inputdir+"ZZ8H.root","finalTree",PAIR,10,10,outputnameGR,cutGR)
+    MCGenHisto = Make1DPlot(inputdir+"ZZ8H.root","finalTree",PAIR[0],10,outputnameG,cutG)
+    MCRecoHisto = Make1DPlot(inputdir+"ZZ8H.root","finalTree",PAIR[1],10,outputnameR,cutR)
+    hMeas = Make1DPlot(inputdir+"Data8H.root","finalTree",PAIR[1],10,"Data.png",cutR)
+    # unfolded bins:
+    response = RooUnfoldResponse (MCRecoHisto, MCGenHisto, GenVsReco2DHisto)
+    
 
-    pad1.cd()
-    pad1.SetLogy()
-    Hreco= TH1D( "Reco", "", 10, 0.0, 800.0 )
-    hReco= TH1D( "Reco Unfold", "", 10, 0.0, 800.0 )
-    finD = TFile.Open(inputdir+"Data8H.root","READ")
-    tinD = finD.Get("finalTree")
-    ND = tinD.GetEntries()
-    print ND, "entries Data"
-    for n in range(ND):
-        #if (n%1000 == 1) or (n+1==ND):
-            #print str(n+1) +' of '+str(ND) +' events evaluated.'
-        tinD.GetEntry(n)
-        Hreco.Fill(tinD.zpt)
-
-    #response.Draw()
-    #c2.Print("H2D.png")
-    # for i in xrange(100000):
-    #     # xt= gRandom.BreitWigner( 0.3, 2.5 )
-    #     xt= gRandom.Gaus( 0.0, 5.0 )
-    #     x= smear (xt)
-    #     if x != None:
-    #         response.Fill( x, xt )
-    #     else:
-    #         response.Miss( xt )
+    # sys.exit("done")
     print "==================================== TEST ====================================="
     #hTrue= TH1D( "true", "Test Truth", 20, -10.0, 10.0 )
     #hMeas= TH1D( "meas", "Test Measured", 40, -10.0, 10.0 )
     hTrue= TH1D( "true", "Test Truth", 10, 0.0, 800.0 )
-    hMeas= TH1D( "meas", "Test Measured", 10, 0.0, 800.0 )
-    # Test with a Gaussian, mean 0 and width 2.
-    for n in range(ND):
-        #if (n%1000 == 1) or (n+1==N):
-            #print str(n+1) +' of '+str(N) +' events evaluated.'
-        tinD.GetEntry(n)
-#        hTrue.Fill(tin.zptG) #closure tests
-        if tinD.zpt != None:
-            hMeas.Fill( tinD.zpt )
-    # for i in xrange(10000):
-    #     # xt= gRandom.Gaus( 0.0, 2.0 )
-    #     xt= gRandom.BreitWigner( 0.3, 2.5 )
-    #     x= smear( xt )
-    #     hTrue.Fill( xt )
-    #     if x != None:
-    #         hMeas.Fill( x )
+    # hMeas= TH1D( "meas", "Test Measured", 10, 0.0, 800.0 )
 
     print "==================================== UNFOLD ==================================="
     print "Unfolding method:", optunf
@@ -158,68 +149,16 @@ def main( optunf="Bayes" ):
     elif "Reverse" in optunf:
         unfold= RooUnfoldBayes( response, hMeas, 1 )
 
-    hReco= unfold.Hreco()
+    hTrue= unfold.Hreco()
     # unfold.PrintTable( cout, hTrue )
-    unfold.PrintTable( cout, hTrue, 2 )
-    
-    hReco.SetLineStyle(1)
-    hReco.SetLineWidth(2)
-    hMeas.SetLineWidth(2)
-    hTrue.SetLineWidth(2) 
+    # unfold.PrintTable( cout, hTrue, 2 )
 
-    hReco.SetLineColor(2)
-    
-    hMeas.GetYaxis().SetTitle("Events")
-    hMeas.GetXaxis().SetTitle("Pt(Z) (GeV)")
+    c1 = TCanvas("c1")
+
+    hMeas.SetLineColor(8)
     hMeas.Draw()
-    hTrue.SetLineColor(8)
+    hTrue.SetLineColor(2)
     hTrue.Draw("SAME")
-    hReco.Draw("SAME")
-
-    leg = TLegend(0.7,0.7,0.85,0.85,"","brNDC")
-    leg.SetTextFont(132)
-    leg.SetTextSize(0.03)
-    leg.SetFillColor(0)
-    leg.SetBorderSize(0)
-    leg.AddEntry(hReco,"unfolded data")
-    leg.AddEntry(hMeas,"data")
-    leg.AddEntry(hTrue,"ZZ MC")
-    leg.Draw("SAME")
-
-    pad2.cd()
-    
-    # MIN = hReco.GetMinimum()
-    # MAX = hReco.GetMaximum()
-    # print MIN, MAX
-    BINS = hReco.GetXaxis().GetNbins()
-    print BINS
-    h_comp = TH1F("h_comp","",BINS,0.0,800.0)
-    
-    for bin in range(BINS): #compare true and unfolded
-        UU = hReco.GetBinContent(bin+1)
-        TT = hTrue.GetBinContent(bin+1)
-        MM = hMeas.GetBinContent(bin+1)
-        if (TT > 0.0):
-            h_comp.SetBinContent(bin+1,UU/TT)
-        else:
-            h_comp.SetBinContent(bin+1,0.0)
-
-    h_comp.GetYaxis().SetTitle("Unfold/True")
-    h_comp.SetLineWidth(2)
-    h_comp.SetMinimum(1.1)#0.8*h_comp.GetMinimum())
-    h_comp.SetMaximum(0.9)#*h_comp.GetMaximum())
-    h_comp.SetMarkerStyle(21)
-    h_comp.SetMarkerSize(0.5)
-    h_comp.GetYaxis().SetTitleFont(132)
-    h_comp.GetYaxis().SetTitleSize(.15)
-    h_comp.GetYaxis().SetTitleOffset(.2)
-    h_comp.GetYaxis().SetLabelSize(.12)
-    h_comp.GetXaxis().SetLabelSize(.12)
-    h_comp.Draw("ep")
-    line1 = TLine(0.0,1,800.0,1)
-    line1.Draw("SAME")
-
-    h_comp.Draw()
 
     c1.Print("UF.png")
 
