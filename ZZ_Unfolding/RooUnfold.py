@@ -22,7 +22,7 @@ import math
 import numpy
 import array
 import random
-from GrabHistos6 import *
+from GrabHistos7 import *
 
 ROOT.gStyle.SetOptStat(0)
 
@@ -49,8 +49,8 @@ def edges(hA):
 
 
 def Make2DPlot(a_file,treename,variablepair,outputname,cut):
-  binsx = 50
-  binsy = 50
+  # binsx = 50
+  # binsy = 50
   c5 = TCanvas("c5")
   gStyle.SetOptStat(0)
   c5.SetLogx()
@@ -75,8 +75,8 @@ def Make2DPlot(a_file,treename,variablepair,outputname,cut):
 
   #exec('hTWO=TH2F("hTWO","Unfolding Matrix",binsx,min_'+variablepair[1]+',max_'+variablepair[1]+',binsy,min_'+variablepair[0]+',max_'+variablepair[0]+')')
   #newBins = array.array("d",[0., 20., 45., 60., 80., 100., 200., 400., 1000.])
-  newBins = array.array("d",[40., 60., 80., 100., 200., 400., 1000.])
-  #newBins = array.array("d",[45.,100., 200., 400., 1000.])
+  #newBins = array.array("d",[45., 60., 80., 100., 200., 400., 1000.])
+  newBins = array.array("d",[45.,100., 200., 400., 1000.])
   hTWO= TH2F("hTWO","Unfolding Matrix",len(newBins)-1,newBins,len(newBins)-1,newBins)
   TestTree.Project('hTWO',variablepair[0]+':'+variablepair[1],cut)
 
@@ -88,8 +88,12 @@ def Make2DPlot(a_file,treename,variablepair,outputname,cut):
   line2 = TLine(0,0,1000,1000) #xy,xy
   line2.Draw("SAME")
 
-
-  c5.Print(outputname)
+  pref = ""
+  if "13*13" in cut:
+    pref = "MM"
+  if "11*11" in cut:
+    pref = "EE"
+  c5.Print(pref+outputname)
   return hTWO
 
 def Make1DPlot(a_file,treename,variable,outputname,cut):
@@ -112,7 +116,7 @@ def Make1DPlot(a_file,treename,variable,outputname,cut):
   print NNN, "entries"
 
   #binset = [0., 20., 45., 60., 80., 100., 200., 400., 1000.]
-  binset = [40., 60., 80., 100., 200., 400., 1000.]
+  binset = [45., 60., 80., 100., 200., 400., 1000.]
   nbins = len(binset)-1
   tbinning = array.array("d",binset)
 
@@ -132,7 +136,12 @@ def Make1DPlot(a_file,treename,variable,outputname,cut):
   hSig1.SetMinimum(0.01)
   hSig1.Draw()
 
-  c5.Print(outputname)
+  pref = ""
+  if "13*13" in cut:
+    pref = "MM"
+  if "11*11" in cut:
+    pref = "EE"
+  c5.Print(pref+outputname)
 
   return hSig1
 
@@ -155,7 +164,12 @@ def SubtractMany1DPlots(hA,HB):
 
   h_sub.Draw()
 
-  c5.Print("diffAB.png")
+  # pref = ""
+  # if "13*13" in cut:
+  #   pref = "MM"
+  # if "11*11" in cut:
+  #   pref = "EE"
+  # c5.Print(pref+"diff.png")
 
   print BinContent(h_sub), "FROM DIFF"
   print sum(BinContent(h_sub))
@@ -174,7 +188,7 @@ def main( optunf="Bayes" ):
         txt= "Unfolding option " + optunf + " not recognised"
         raise ValueError( txt )
 
-    global hReco, hMeas, hTrue
+    global hReco, hMeas, hTrue, hTrueEE, hTrueMM, hMeasMM, hMeasEE
 
     #c2 = TCanvas("c2")
     print "==================================== TRAIN ===================================="
@@ -189,46 +203,46 @@ def main( optunf="Bayes" ):
     cutG = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(pgen>0)"
     cutR = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(preco>0)"
     cutGR = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(pgen>0)*(preco>0)"
-    cutRB = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)"
+    cutWZ = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)"
 
-    GenVsReco2DHisto = Make2DPlot(inputdir+"ZZ.root","tmvatree",PAIR,outputnameGR,cutGR)
-    # MCGenHisto = Make1DPlot(inputdir+"ZZ.root","tmvatree",PAIR[0],outputnameG,cutG)
-    # MCRecoHisto = Make1DPlot(inputdir+"ZZ.root","tmvatree",PAIR[1],outputnameR,cutR)
-    MCGenHisto = REBIN(Make1DPlot(inputdir+"ZZ.root","tmvatree",PAIR[0],outputnameG,cutG))
-    MCRecoHisto = REBIN(Make1DPlot(inputdir+"ZZ.root","tmvatree",PAIR[1],outputnameR,cutR))
-    print MCRecoHisto.Integral(), "events"
+    cutGMM = "((L1GId*L2GId)==-13*13)"
+    cutRMM = "((l1id*l2id)==-13*13)"
+    cutGEE = "((L1GId*L2GId)==-11*11)"
+    cutREE = "((l1id*l2id)==-11*11)"
+
+    GenVsReco2DHistoMM = Make2DPlot(inputdir+"ZZ.root","tmvatree",PAIR,outputnameGR,cutGR+"*"+cutGMM+"*"+cutRMM)
+    MCGenHistoMM = REBIN(Make1DPlot(inputdir+"ZZ.root","tmvatree",PAIR[0],outputnameG,cutG+"*"+cutGMM))
+    MCRecoHistoMM = REBIN(Make1DPlot(inputdir+"ZZ.root","tmvatree",PAIR[1],outputnameR,cutR+"*"+cutRMM))
+
+    GenVsReco2DHistoEE = Make2DPlot(inputdir+"ZZ.root","tmvatree",PAIR,outputnameGR,cutGR+"*"+cutGEE+"*"+cutREE)
+    MCGenHistoEE = REBIN(Make1DPlot(inputdir+"ZZ.root","tmvatree",PAIR[0],outputnameG,cutG+"*"+cutGEE))
+    MCRecoHistoEE = REBIN(Make1DPlot(inputdir+"ZZ.root","tmvatree",PAIR[1],outputnameR,cutR+"*"+cutREE))
+
+
     hsWW = makehistos("Data8H.root",inputdirNoPrep)
     hsDY = makehistosDY('gamma_out_8_MoreBins_ll.root',inputdirDY)
-    #hMeas = Make1DPlot(inputdir+"Data8H.root","tmvatree",PAIR[1],"Data.png","")
-    hMeas = REBIN(Make1DPlot(inputdirNoPrep+"Data8H.root","finalTree",PAIR[1],"Data.png",""))
-    hWZ = REBIN(Make1DPlot(inputdir+"WZ.root","tmvatree",PAIR[1],"WZ.png",cutRB))
-    # hMeas = Make1DPlot(inputdirNoPrep+"Data8H.root","finalTree",PAIR[1],"Data.png","")
-    # hWZ = Make1DPlot(inputdir+"WZ.root","tmvatree",PAIR[1],"WZ.png",cutRB)
+    hMeasMM = REBIN(Make1DPlot(inputdirNoPrep+"Data8H.root","finalTree",PAIR[1],"Data.png",cutRMM))
+    hMeasEE = REBIN(Make1DPlot(inputdirNoPrep+"Data8H.root","finalTree",PAIR[1],"Data.png",cutREE))
+    hWZMM = REBIN(Make1DPlot(inputdir+"WZ.root","tmvatree",PAIR[1],"WZ.png",cutWZ+"*"+cutRMM))
+    hWZEE = REBIN(Make1DPlot(inputdir+"WZ.root","tmvatree",PAIR[1],"WZ.png",cutWZ+"*"+cutREE))
 
-    print '#'*80
-    Make1DPlot(inputdir+"WZ.root","tmvatree",PAIR[1],"WZ.png",cutRB).Print("range")
-    print '#'*80
 
-    print hWZ.Integral(), "WZ"
-    print hsWW[0].Integral(), hsWW[1].Integral(), "WW"
-    print hsDY[0].Integral(), hsDY[1].Integral(), "DY"
-    print hMeas.Integral(), "Meas"
-    print hMeas.Integral() - hsWW[0].Integral() - hsWW[1].Integral() - hWZ.Integral() - hsDY[0].Integral() - hsDY[1].Integral(), "Proper result"
-    print "=^"*30, "Yields"
-    print hsWW[0].Integral(), hsWW[1].Integral(), hWZ.Integral(), hsDY[0].Integral(), hsDY[1].Integral(), "+=", hsWW[0].Integral() + hsWW[1].Integral() + hWZ.Integral() + hsDY[0].Integral() + hsDY[1].Integral()
-    BKGDS = [REBIN(hsWW[0]),REBIN(hsWW[1]),REBIN(hWZ),REBIN(hsDY[0]),REBIN(hsDY[1])]
+    #Make1DPlot(inputdir+"WZ.root","tmvatree",PAIR[1],"WZ.png",cutWZ).Print("range")
+
+    print hsWW[0].Integral() , hWZMM.Integral(), hsDY[0].Integral(), "muons"
+    print hsWW[1].Integral() , hWZEE.Integral(), hsDY[1].Integral(), "elec"
+
+    BKGDSMM = [REBIN(hsWW[0]),hWZMM,REBIN(hsDY[0])]
+    BKGDSEE = [REBIN(hsWW[1]),hWZEE,REBIN(hsDY[1])]
     #BKGDS = [hsWW[0],hsWW[1],hWZ,hsDY[0],hsDY[1]]
-    hDiff = SubtractMany1DPlots(hMeas,BKGDS)
-    print hDiff.Integral(), "hDiff result"
+    hDiffMM = SubtractMany1DPlots(hMeasMM,BKGDSMM)
+    hDiffEE = SubtractMany1DPlots(hMeasEE,BKGDSEE)
+    # print hDiff.Integral(), "hDiff result"
     # unfolded bins:
-    response = RooUnfoldResponse (MCRecoHisto, MCGenHisto, GenVsReco2DHisto)
+    responseMM = RooUnfoldResponse (MCRecoHistoMM, MCGenHistoMM, GenVsReco2DHistoMM)
+    responseEE = RooUnfoldResponse (MCRecoHistoEE, MCGenHistoEE, GenVsReco2DHistoEE)
     #sys.exit("done")
-    # print "edges:"
-    # print edges(MCGenHisto)
-    # print edges(MCRecoHisto)
-    # print edges(hMeas)
-    # print edges(hBKGD)
-    # sys.exit("done")
+
     print "==================================== TEST ====================================="
     #hTrue= TH1D( "true", "Test Truth", 20, -40.0, 40.0 )
     #hMeas= TH1D( "meas", "Test Measured", 40, -10.0, 10.0 )
@@ -239,8 +253,12 @@ def main( optunf="Bayes" ):
     print "Unfolding method:", optunf
     if "Bayes" in optunf:
         # Bayes unfoldung with 4 iterations
-        unfold= RooUnfoldBayes( response, hDiff, 4)
-        closure= RooUnfoldBayes( response, MCRecoHisto, 4)
+        unfoldMM= RooUnfoldBayes( responseMM, hDiffMM, 4)
+        closureMM= RooUnfoldBayes( responseMM, MCRecoHistoMM, 4)
+
+        unfoldEE= RooUnfoldBayes( responseEE, hDiffEE, 4)
+        closureEE= RooUnfoldBayes( responseEE, MCRecoHistoEE, 4)
+        
         print "Bayes "*20
         #closure= RooUnfoldBayes( response, MCRecoHisto , 4 )
         #unfold= RooUnfoldBayes( response, hMeas, 10, False, True )
@@ -257,16 +275,22 @@ def main( optunf="Bayes" ):
     elif "Reverse" in optunf:
         unfold= RooUnfoldBayes( response, hMeas, 1 )
 
-    hTrue= unfold.Hreco()
-    hClose = closure.Hreco()
-    # makeComparison(MCGenHisto,hTrue,hDiff)
-    # makeClosure(MCGenHisto,MCRecoHisto,hTrue,hDiff)
-    makeComparison(MCGenHisto,MCRecoHisto,hTrue,hDiff,hClose)
-    #makeComparison(MCGenHisto,MCRecoHisto,hTrue,hDiff,False)
-    #hClose = closure.Hreco()
-    # unfold.PrintTable( cout, hTrue )
-    # unfold.PrintTable( cout, hTrue, 2 )
-    #sys.exit("done")
+    # hTrue= unfold.Hreco()
+    # hClose = closure.Hreco()
+
+    hTrueMM= unfoldMM.Hreco()
+    hCloseMM = closureMM.Hreco()
+    hTrueEE= unfoldEE.Hreco()
+    hCloseEE = closureEE.Hreco()
+
+
+    makeComparison(MCGenHistoMM,MCRecoHistoMM,hTrueMM,hDiffMM,hCloseMM,"MM")
+    makeComparison(MCGenHistoEE,MCRecoHistoEE,hTrueEE,hDiffEE,hCloseEE,"EE")
+
+
+
+    makeComparison(ADDER(MCGenHistoMM,MCGenHistoEE),ADDER(MCRecoHistoMM,MCRecoHistoEE),ADDER(hTrueMM,hTrueEE),ADDER(hDiffMM,hDiffEE),ADDER(hCloseMM,hCloseEE),"BOTH")
+
 
     return
 
