@@ -25,6 +25,7 @@ def projplot(histo,histoname,SCALE,chan):
 	print chan, "CHAN"
 	c1 = TCanvas("c1")
 	#gStyle.SetOptStat(1111111)
+	#test comment
 	c1.SetLogx()
   	c1.SetLogy()
 	#exec('H = '+histo+'.ProjectionY("one", 200, 200,"")')
