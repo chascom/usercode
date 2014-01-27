@@ -9,6 +9,7 @@ import numpy
 import array
 import random
 
+
 def check(histos,distlist):
 	for dd in distlist: #check to make sure
 		if (dd not in histos):
