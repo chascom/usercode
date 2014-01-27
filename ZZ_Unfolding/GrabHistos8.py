@@ -413,7 +413,3 @@ def makeComparison(MCGenHistos,MCRecoHistos,hTrues,hDiffs,hCloses):
 	#h_comp3.Draw()
 
 	c1.Print("UFCT2.png")
-
-
-
-#makehistosDY('gamma_out_8_MoreBins_ll.root','/afs/cern.ch/work/c/chasco/RJS/CMSSW_5_3_3_patch2/src/CMGTools/HtoZZ2l2nu/Unfolding/DYbkgd/')
