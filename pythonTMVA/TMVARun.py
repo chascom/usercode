@@ -581,9 +581,9 @@ METHODS = ["Likelihood"]#,"BDT"]#,"SVM"]#,"CFMlpANN","MLP","SVM"]
 #inputdir = "/tmp/chasco/INIT/HADD/TMVA/" #automate this, and the hadding
 #inputdir = "/afs/cern.ch/work/c/chasco/WDS_7/"
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/"
-inputdir = "/afs/cern.ch/work/c/chasco/NOV19_7/"
-TeV = "7"
-SkipLowStats = True
+inputdir = "/afs/cern.ch/work/c/chasco/NOV19_8/"
+TeV = "8"
+SkipLowStats = False
 os.system("rm "+inputdir+"BKGDandZZ.root")
 os.system("rm "+inputdir+"BKGD.root")
 os.system("rm "+inputdir+"ZHcombo.root")
