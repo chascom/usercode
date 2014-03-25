@@ -75,7 +75,7 @@ def card(signal,bkgd,Data,infile,VR,VU,VD):
 	tablelist.write("# Counting experiment with multiple channels\n")
 	tablelist.write("imax 1  number of channels\n")
 	tablelist.write("jmax "+str(len(bkgd))+"  number of backgrounds ('*' = automatic)\n")
-	tablelist.write("kmax "+str(14)+" number of nuisance parameters (sources of systematical uncertainties)\n") #14
+	tablelist.write("kmax "+str(8)+" number of nuisance parameters (sources of systematical uncertainties)\n") #14
 	tablelist.write("------------\n")
 	if CountingSyst and (not ShapeSyst):
 		tablelist.write("#Counting\n")
@@ -199,7 +199,7 @@ def card(signal,bkgd,Data,infile,VR,VU,VD):
 # sdir = "ShapeFiles/H8__TMVA2/"
 #sdir = "ShapeFiles/H7__SIMP/"
 #sdir = "ShapeFiles/H8__WR/"
-sdir = "/afs/cern.ch/work/c/chasco/RJS/CMSSW_5_3_3_patch2/src/CMGTools/HtoZZ2l2nu/TMVA/v4/"
+sdir = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/TMVA/v7/"
 countshape = "shape"
 # sdir = "combined/"
 # sdir = "ShapeFiles/H8__newold/"
