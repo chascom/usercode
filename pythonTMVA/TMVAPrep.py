@@ -187,6 +187,7 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 	print f, "F"*20
 	H=fin.Get('all_cutflow')
 	NUMGENEVENT = H.GetBinContent(1)
+	print NUMGENEVENT, "#################################### NUMBER OF GENERATED EVENTS"
 	BIN2 = H.GetBinContent(2)
 	BIN3 = H.GetBinContent(3)
 
@@ -228,10 +229,12 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 	addinvariables += ['training0','training1','training2','training3','training4']#,'Wscale','Zscale']
 	addinvariables += ['trainingH0','trainingH1','trainingH2','trainingH3','trainingH4']
 	addinvariables += ['trainingR0','trainingR1','trainingR2','trainingR3','trainingR4']
+	addinvariables += ['TransMass','TransMass1H','TransMass2H']
 	addinvariables += ['phil1met','phil2met','Thrust','DeltaPz','DeltaPhi_ZH','TransMass3','TransMass4','CScostheta','CMsintheta']
 	addinvariables += ['Theta_lab','ZL1_Boost','ZL1_lab','ZL2_lab','ZRapidity','Lep2Dover3D','ZMEToverLep3D','ZMEToverLep2D','l1l2metPt','l1l2minusmetPt']
 	addinvariables += ['Boost11','Boost22','Boost12','Boost21']
-	addinvariables += ['etadiffBYllphi','ThetaBYllphi','llphiSUBZmetphi','metOVERl1pt','metPzptOVERl1ptPl2pt','metMl1pt','DeltaR']
+	addinvariables += ['etadiff','etadiffBYllphi','ThetaBYllphi','llphiSUBZmetphi','metOVERl1pt','metPzptOVERl1ptPl2pt','metMl1pt','DeltaR']
+	addinvariables += ['qphi','s1qphi','s2qphi']
 	#addinvariables += ['mt_max','mt_11','mt_22','mt_12','mt_21','qmet','qang']
 
 
@@ -292,6 +295,8 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 					exec('WT'+str(rr)+'[0]=1.0')
 					exec('trainingH'+str(rr)+'[0]=0.0')
 					exec('WTH'+str(rr)+'[0]=1.0')
+					exec('trainingR'+str(rr)+'[0]=0.0')
+					exec('WTR'+str(rr)+'[0]=1.0')
 				# Wscale[0] = 1.0
 				# Zscale[0] = 1.0
 			else:
@@ -358,7 +363,9 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 			Thrust[0] = (L1-L2).Pt()
 			DeltaPz[0] = abs((L1-L2).Pz())
 			DeltaPhi_ZH[0] = abs(ZB.DeltaPhi(MET))
-			#TransMass[0] = (L1 + L2 + MET).Mt()
+			TransMass[0] = (L1 + L2 + MET).Mt()
+			TransMass1H[0] = (L1 + MET).Mt()
+			TransMass2H[0] = (L2 + MET).Mt()
 			#TransMass_Eff[0] = L1.Et() + L2.Et() + MET.Et()
 			#TransMass2[0]= math.sqrt(2*(L1.Pt()*L2.Pt()*(1-math.cos(abs(L1.DeltaPhi(L2)))) + L1.Pt()*MET.Pt()*(1-math.cos(abs(L1.DeltaPhi(MET)))) + L2.Pt()*MET.Pt()*(1-math.cos(abs(L2.DeltaPhi(MET)) ))))
 			TransMass3[0]= math.sqrt(2*(L1+L2).Pt()*MET.Pt()*(1-math.cos(abs(MET.DeltaPhi(L1+L2)))))
@@ -389,12 +396,16 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 			l1l2minusmetPt[0] = (L1+L2).Pt() - (MET).Pt()
 
 			etadiffBYllphi[0]=abs(l1eta[0]-l2eta[0])*(llphi[0])
+			etadiff[0]=abs(l1eta[0]-l2eta[0])
 			ThetaBYllphi[0]=Theta_lab[0]*llphi[0]
 			llphiSUBZmetphi[0]=llphi[0]-Zmetphi[0]
 			metOVERl1pt[0]=(met[0]/l1pt[0])
 			metPzptOVERl1ptPl2pt[0]=(met[0]+zpt[0])/(l1pt[0]+l2pt[0])
 			metMl1pt[0]=(met[0]-l1pt[0])
 			DeltaR[0] = math.sqrt((l1eta[0]-l2eta[0])**2 + (llphi[0])**2)
+			qphi[0] = (llphi[0]**2 + phil2met[0]**2 + phil1met[0]**2)
+			s1qphi[0]=(1.0*(phil2met[0]**2))/(1.0*qphi[0]+0.0001)
+			s2qphi[0]=(1.0*(phil2met[0]**2))/(1.0*qphi[0]+0.0001)
 
 			# mt2v = MT2(l1pt[0],l1eta[0],l1phi[0],l2pt[0],l2eta[0],l2phi[0],met[0],metphi[0])
 			# mt_max[0] = mt2v[0]
@@ -423,7 +434,7 @@ def Convert(f,filesANDsamples,filesANDsamples2,indir,lumi,TeV8):
 
 # WHICH ENERGY?
 TeV8 = True
-outputdir="/afs/cern.ch/work/c/chasco/NOV19_8/"
+outputdir="/afs/cern.ch/work/c/chasco/MAR18_8/"
 
 SampleList = []
 SampleList1 = []
@@ -449,7 +460,8 @@ if (TeV8): #organize this better
 	SampleList.append(['ZZ',0.355036,1])
 	SampleList2.append(['ZH105',0.6750,0.100974])
 	SampleList2.append(['ZH115',0.5117,0.100974])
-	SampleList2.append(['ZH125',0.3943,0.100974])
+	#SampleList2.append(['ZH125',0.3943,0.100974])
+	SampleList2.append(['ZH125',0.3943,0.067316])
 	SampleList2.append(['ZH135',0.3074,0.100974])
 	SampleList2.append(['ZH145',0.2424,0.100974])
 	SampleList1.append(['ZH105',0.7022,0.100974])
