@@ -135,9 +135,12 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   print NS, NB, "INITIAL N" + "*"*20
 
   GG = 0.8
-  PPP = 0.66
-  tNS = ((1.0*NS)/13.0)*PPP*GG
-  tNB = ((1.0*NB)/13.0)*PPP*GG
+  #PPP = 0.66
+  PPP = 0.5
+  #tNS = ((1.0*NS)/13.0)*PPP*GG
+  #tNB = ((1.0*NB)/13.0)*PPP*GG
+  tNS = ((1.0*NS)/1.0)*PPP*GG
+  tNB = ((1.0*NB)/1.0)*PPP*GG
   vNS = tNS*(1.0-GG)/GG
   vNB = tNB*(1.0-GG)/GG
   tNS = round(tNS)
@@ -145,6 +148,7 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   vNS = round(vNS)
   vNB = round(vNB)
 
+  print NS, NB, "signal/background"
   print tNS, tNB, "training sample sizes"
   print vNS, vNB, "testing sample sizes"
 
@@ -213,73 +217,32 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
 
   if "BDT" in methods:
-    factory.BookMethod(TMVA.Types.kBDT, "BDT" + suffix,
-                       ":".join([
-                           "!H",
-                           "!V",
-                           "NTrees=200",
-                           #"NTrees=1000",
-                           #"nEventsMin=150",
-                           "MaxDepth=2", #2
-                           "BoostType=AdaBoost",
-                           "AdaBoostBeta=0.5",
-                           "SeparationType=GiniIndex",
-                           "nCuts=-1",
-                           "PruneMethod=NoPruning",
-                           ]))
+    bdttrees = ['1000','2000']#,'1000','4000']#,'1000']#,'200','500','1000']
+    bdtdepth = ['3']#,'4']#,'5']
+    for tt in bdttrees:
+      for dd in bdtdepth:
+        factory.BookMethod(TMVA.Types.kBDT, "BDT"+str(tt)+str(dd) + suffix,
+                           ":".join([
+                               "!H",
+                               "!V",
+                               "NTrees="+str(tt),
+                               #"NTrees=1000",
+                               #"nEventsMin=150",
+                               "MaxDepth="+str(dd), #2
+                               "BoostType=AdaBoost",
+                               "AdaBoostBeta=0.5",
+                               "SeparationType=GiniIndex",
+                               "nCuts=-1",
+                               "PruneMethod=NoPruning",
+                               ]))
 
 
-    #  if "BDT" in methods:
-    factory.BookMethod(TMVA.Types.kBDT, "BDT500" + suffix,
-                       ":".join([
-                           "!H",
-                           "!V",
-                           "NTrees=500",
-                           #"NTrees=1000",
-                           #"nEventsMin=150",
-                           "MaxDepth=2", #2
-                           "BoostType=AdaBoost",
-                           "AdaBoostBeta=0.5",
-                           "SeparationType=GiniIndex",
-                           "nCuts=-1",
-                           "PruneMethod=NoPruning",
-                           ]))
-
-    # factory.BookMethod(TMVA.Types.kBDT, "BDT2" + suffix,
-    #                    ":".join([
-    #                        "!H",
-    #                        "!V",
-    #                        "NTrees=200",
-    #                        #"NTrees=1000",
-    #                        #"nEventsMin=150",
-    #                        "MaxDepth=2", #2
-    #                        "BoostType=AdaBoost",
-    #                        "AdaBoostBeta=0.5",
-    #                        "SeparationType=GiniIndex",
-    #                        "nCuts=-1",
-    #                        "PruneMethod=NoPruning",
-    #                        ]))
-
-    # factory.BookMethod(TMVA.Types.kBDT, "BDT3" + suffix,
-    #                    ":".join([
-    #                        "!H",
-    #                        "!V",
-    #                        "NTrees=100",
-    #                        #"NTrees=1000",
-    #                        #"nEventsMin=150",
-    #                        "MaxDepth=3", #2
-    #                        "BoostType=AdaBoost",
-    #                        "AdaBoostBeta=0.5",
-    #                        "SeparationType=GiniIndex",
-    #                        "nCuts=-1",
-    #                        "PruneMethod=NoPruning",
-    #                        ]))
 
 
   if "Likelihood" in methods:
-    SMOOTH = ['0','1','2','3','4','5','6','9','10']
-    NBINS = ['15','20','25','30']
-    NA = ['10','25','50','100']
+    SMOOTH = ['0']#,'4']#,'6','9','10']
+    NBINS = ['20']#,'30']
+    NA = []#['100']#['10','25','50','100']
     for sm in SMOOTH:
       for nb in NBINS:
         factory.BookMethod(TMVA.Types.kLikelihood, "Likelihoodbin" + sm + nb + suffix,
@@ -317,9 +280,9 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
     factory.BookMethod(TMVA.Types.kSVM,"SVM" + suffix,
       ":".join([
         "!H",
-        "C=1000",
+        "C=1",
         #"Kernel=Linear",
-        "Gamma=1",
+        "Gamma=0.1",
         "Tol=0.01",
         "VarTransform=Norm",
         ]))
@@ -538,7 +501,8 @@ def MakeTrialFile(Twofiles):
 
 #WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT" #may need to do cuts prior to this
 WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT_replace"#*Wscale*Zscale"
-CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*(pBveto>0.0)*(training_replace>0.0)" #no raw booleans! put (bool > 0.0)
+CUTTING = "(trainingH_replace>0.0)"
+#CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*(pBveto>0.0)*(training_replace>0.0)" #no raw booleans! put (bool > 0.0)
 #CUTTING += '*(finstate < 1.5)'
 #CUTTING = "training*(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*pBveto"
 
@@ -557,10 +521,6 @@ CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass 
 # INPUTVARS_ZZvsBKGD = INPUTVARS + ['mass']
 #INPUTVARS = ['l1pt','TransMass3','l1Err','l2Err','CMsintheta','Boost11','Boost22','Theta_lab','DeltaPhi_ZH','phil2met','ZRapidity','CScostheta','l1l2metPt']
 #INPUTVARS = ['l1pt','l2pt','TransMass3','REDmetmetphi','l1Err','l2Err','Lep2Dover3D','ZMEToverLep3D','l1l2minusmetPt','baldiff','ColinSoper','CMsintheta','Boost11','Boost22','Theta_lab','DeltaPhi_ZH','phil2met','ZRapidity','l1l2metPt','ZL2_lab','ZL1_lab','ZL1_Boost']
-INPUTVARS = ['l2pt','TransMass3','DeltaPhi_ZH']#'ColinSoper','phil2met'] #'l1Err','l2Err'
-#INPUTVARS += ['ZL2_lab']#,'Boost11']#'CMsintheta','baldiff','ZRapidity'
-INPUTVARS += ['fabs(etadiffBYllphi)','ThetaBYllphi','llphiSUBZmetphi','metPzptOVERl1ptPl2pt','metMl1pt']#,'(llphi + Zmetphi)','(llphi*Zmetphi)']#,'metMl1pt' 'metOVERl1pt'
-INPUTVARS += ['fabs(l1eta-l2eta)','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llphi)',"llphi"]
 # INPUTVARS += ['(l1eta-l2eta)*(llphi)','Theta_lab*llphi','llphi-Zmetphi']#,'Theta_lab*Zmetphi']#'Theta_lab*Zmetphi','llphi','Zmetphi','(l1eta-l2eta)*Zmetphi','(zeta-l1eta)*Zmetphi']#,'l1l2minusmetPt'] #'(zeta-l2eta)*(zphi-l2phi)','(l1eta-l2eta)*(l1phi-l2phi)*(l1pt-l2pt)'
 # INPUTVARS += ['(met-l1pt)']#'(zpt/l1pt)','(l1pt-l2pt)','(met-l2pt)','(zpt-met)','(zpt-l2pt)']'(zpt-l1pt)'
 # #INPUTVARS += ['(l1pt*(l1phi-metphi)-l2pt*(l2phi-metphi))','(l1pt*(l1phi-zphi)-l2pt*(l2phi-zphi))','(l1pt*(l1phi-zphi)-l2pt*(l2phi-zphi))','(l1pt*(l1eta-zeta)-l2pt*(l2eta-zeta))']
@@ -571,19 +531,39 @@ INPUTVARS += ['fabs(l1eta-l2eta)','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llph
 #INPUTVARS_ZZvsBKGD = ['TransMass3','Zmetphi','fabs(etadiffBYllphi)','llphiSUBZmetphi','metPzptOVERl1ptPl2pt','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llphi)','l2pt','metMl1pt']
 # INPUTVARS_ZZvsBKGD = ['zpt','etadiffBYllphi','ThetaBYllphi','metOVERl1pt','metPzptOVERl1ptPl2pt','DeltaR'] #'Theta_lab'
 # INPUTVARS_ZZvsBKGD += ['llphiSUBZmetphi']#'Boost11','Boost22',
-INPUTVARS_ZZvsBKGD = ["zpt",'etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR*DeltaR-2*etadiffBYllphi']#,'metPzptOVERl1ptPl2pt','Zmetphi*met/zpt','(met+zpt)','(l1pt+l2pt)','(l1pt+l2pt+met)','(l1pt+l2pt)/zpt']#,'DeltaR'] #'Theta_lab'
+
+INPUTVARS = ['l2pt','TransMass3','DeltaPhi_ZH']#'ColinSoper','phil2met'] #'l1Err','l2Err'
+
+INPUTVARS += ['fabs(etadiffBYllphi)','ThetaBYllphi','llphiSUBZmetphi','metPzptOVERl1ptPl2pt','metMl1pt']#,'(llphi + Zmetphi)','(llphi*Zmetphi)']#,'metMl1pt' 'metOVERl1pt'
+INPUTVARS += ['fabs(l1eta-l2eta)','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llphi)',"llphi"]
+
+INPUTVARS_ZZvsBKGD = ['TransMass3','DeltaPhi_ZH','metMl1pt','ThetaBYllphi']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR*DeltaR-2*etadiffBYllphi']#,'metPzptOVERl1ptPl2pt','Zmetphi*met/zpt','(met+zpt)','(l1pt+l2pt)','(l1pt+l2pt+met)','(l1pt+l2pt)/zpt']#,'DeltaR'] #'Theta_lab'
+INPUTVARS_ZZvsBKGD += ['llphi*llphi + phil2met*phil2met + phil1met*phil1met','(phil2met*phil2met)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)']
+INPUTVARS_ZZvsBKGD += ['etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR'] #['l1pt','l2pt','met','REDmet','zpt','zpt/(l1pt+l2pt)'
+
+INPUTVARS_ZZ = ['mtzh','ThetaBYllphi']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR*DeltaR-2*etadiffBYllphi']#,'metPzptOVERl1ptPl2pt','Zmetphi*met/zpt','(met+zpt)','(l1pt+l2pt)','(l1pt+l2pt+met)','(l1pt+l2pt)/zpt']#,'DeltaR'] #'Theta_lab'
+INPUTVARS_ZZ += ['qphi','s2qphi']
+INPUTVARS_ZZ += ['etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR','llphiSUBZmetphi'] #['l1pt','l2pt','met','REDmet','zpt','zpt/(l1pt+l2pt)'
+INPUTVARS_ZZ += ['l1pt','l2pt','zpt','met','llphi','phil2met','phil1met','etadiff']
+INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt','l2pt','phil1met','DeltaR','llphiSUBZmetphi','s2qphi']
+# INPUTVARS_ZZ = ['etadiffBYllphi','mtzh','Theta_lab','metPzptOVERl1ptPl2pt','DeltaR','l2pt','s2qphi']
+# INPUTVARS_ZZ = ['l2pt','metPzptOVERl1ptPl2pt','etadiffBYllphi','DeltaR','Theta_lab','mtzh']
+#INPUTVARS_ZZ = ['etadiffBYllphi','mtzh']
+
+
 # INPUTVARS_ZZvsBKGD += ['llphiSUBZmetphi',"Boost22"]#'Boost11','Boost22',
 # #INPUTVARS_ZZvsBKGD += ['ZRapidity']
-#['Lep2Dover3D','ZMEToverLep3D','ZMEToverLep2D','l1l2metPt','l1l2minusmetPt','ZL2_lab','ZL1_lab','ZL1_Boost','metMl1pt',''llphiSUBZmetphi'']
+#['Lep2Dover3D','ZMEToverLep3D','ZMEToverLep2D','l1l2metPt','l1l2minusmetPt','ZL2_lab','ZL1_lab','ZL1_Boost','metMl1pt',''llphiSUBZmetphi''] #'(llphi*llphi)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)','(phil1met*phil1met)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)',
 #METHODS = ["KNN","BDT","Likelihood","Fisher"]
-METHODS = ["Likelihood"]#,"BDT"]#,"SVM"]#,"CFMlpANN","MLP","SVM"]
+METHODS = ["Likelihood","BDT"]#,"BDT"]#,"SVM"]#,"SVM"]#,"BDT"]#,"SVM"]#,"CFMlpANN","MLP","SVM"]
 
 #inputdir = "/tmp/chasco/INIT/HADD/TMVA/" #automate this, and the hadding
 #inputdir = "/afs/cern.ch/work/c/chasco/WDS_7/"
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/"
-inputdir = "/afs/cern.ch/work/c/chasco/NOV19_8/"
+inputdir = "/afs/cern.ch/work/c/chasco/MAR18_8/"
 TeV = "8"
 SkipLowStats = False
+Dibosons = True
 os.system("rm "+inputdir+"BKGDandZZ.root")
 os.system("rm "+inputdir+"BKGD.root")
 os.system("rm "+inputdir+"ZHcombo.root")
@@ -622,7 +602,12 @@ for bkgd in bkgdlist:
     if ("DYJets" not in bkgd):
       bkgdstring += " "+inputdir+bkgd
   else:
-    bkgdstring += " "+inputdir+bkgd
+    if (Dibosons):
+      if ("WW" in bkgd) or ("WZ" in bkgd) or ("ZZ" in bkgd):
+        bkgdstring += " "+inputdir+bkgd
+    else:
+      bkgdstring += " "+inputdir+bkgd
+print "#"*40
 print bkgdstring
 #print os.listdir(inputdir)
 if "BKGD.root" not in os.listdir(inputdir):
@@ -630,6 +615,7 @@ if "BKGD.root" not in os.listdir(inputdir):
 else:
   print ">>>>>> BKGD.root already exists"
 if "BKGDandZZ.root" not in os.listdir(inputdir): #merge non-ZZ and ZZ
+  print "HADDING: "+inputdir+"BKGDandZZ.root "+inputdir+"BKGD.root "+inputdir+"ZZ.root"
   os.system("hadd "+inputdir+"BKGDandZZ.root "+inputdir+"BKGD.root "+inputdir+"ZZ.root")
 else:
   print ">>>>>> BKGDandZZ.root already exists"
@@ -640,35 +626,23 @@ else:
 
 ###################################################################################################### TRAINING/TESTING
 #TrainingTesting("try.root","ntuple",["x","y"],"1.0","signal > 0.5","signal <= 0.5","BDT")
+SBpairs = []
+SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZZ]]
 
-SBpairs = [] #pair signal with background for each training-testing run
-# SBpairs += [["ZH125.root", "ZZ.root",INPUTVARS]]
-# SBpairs += [["ZHcombo.root", "ZZ.root",INPUTVARS]]
-# SBpairs += [["ZZ.root","BKGD.root",INPUTVARS_ZZvsBKGD]]
-SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZZvsBKGD]]
-#SBpairs += [["ZHcombo.root","BKGDandZZ.root",INPUTVARS_ZZvsBKGD]]
-#layer by ZZ-ZH,ZZ-nZZ,ZH-all
-#layer by WWtop-nonWWtop, ..
-#layer by WZ-nonWZ ...
-
-# SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZHvsALL]]
-# SBpairs += [["ZHcombo.root","BKGDandZZ.root",INPUTVARS_ZHvsALL]]
-
-print SBpairs
-os.system("rm weights/TMVA*"+TeV+"*.weights.xml") #Remove previously existing weights
-os.system("rm weights/TMVA*"+TeV+"*.class.C")
+# print SBpairs
+# os.system("rm weights/TMVA*"+TeV+"*.weights.xml") #Remove previously existing weights
+# os.system("rm weights/TMVA*"+TeV+"*.class.C")
 
 for sb in SBpairs:
   for rr in range(5):
-    if (rr==3):
+    if (rr==0):
       TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,rr)
-  #TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,3)
-  #TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,4)
+
 
 ########################################################################## APPLICATION
 
-#inputfileslist=['ZH125.root','ZZ.root']
-outputdir = inputdir + "OUT_vt3/"
+# inputfileslist=['ZH125.root','ZZ.root']
+outputdir = inputdir + "OUT_v7d/"
 os.system("mkdir "+outputdir)
 for a in inputfileslistorig:
   MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
