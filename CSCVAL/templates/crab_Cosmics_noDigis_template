@@ -1,0 +1,39 @@
+[CRAB]
+
+jobtype = cmssw
+scheduler = caf
+
+[CMSSW]
+
+datasetpath=DATASET
+#dbs_url=http://cmsdbsprod.cern.ch/cms_dbs_caf_analysis_01/servlet/DBSServlet
+dbs_url=http://cmsdbsprod.cern.ch/cms_dbs_prod_global/servlet/DBSServlet
+pset=CFGFILE
+#total_number_of_events=NEVENT
+total_number_of_lumis=-1
+number_of_jobs = NJOBS
+#output_file = OUTFILE, TPEHists.root
+output_file = OUTFILE
+runselection = RUNNUMBER
+#use_parent = 1
+show_prod = 1
+
+[USER]
+return_data = 1
+copy_data = 0
+storage_element = T2_CH_CAF
+#debug_wrapper = 1
+
+[GRID]
+rb                      = CERN 
+proxy_server            = myproxy.cern.ch 
+dont_check_proxy        = 1
+virtual_organization    = cms
+retry_count             = 0
+lcg_catalog_type        = lfc
+lfc_host                = lfc-cms-test.cern.ch
+lfc_home                = /grid/cms
+
+[CAF]
+queue = cmscaf1nh
+
