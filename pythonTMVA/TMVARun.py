@@ -186,22 +186,23 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   print NS, NB, "INITIAL N" + "*"*20
 
   GG = 0.8
-  PPP = 0.66
-  #PPP = 0.5
-  #tNS = ((1.0*NS)/13.0)*PPP*GG
-  #tNB = ((1.0*NB)/13.0)*PPP*GG
-  tNS = ((1.0*NS)/1.0)*PPP*GG
-  tNB = ((1.0*NB)/1.0)*PPP*GG
-  vNS = tNS*(1.0-GG)/GG
-  vNB = tNB*(1.0-GG)/GG
+  PPP = 1.0 #0.66 no need for this if copytree cut is used
+
+  tNS = NS*PPP*GG
+  tNB = NB*PPP*GG
+
+  # vNS = tNS*(1.0-GG)/GG
+  # vNB = tNB*(1.0-GG)/GG
   tNS = round(tNS)
   tNB = round(tNB)
-  vNS = round(vNS)
-  vNB = round(vNB)
+  # vNS = round(vNS)
+  # vNB = round(vNB)
 
   print NS, NB, "signal/background"
   print tNS, tNB, "training sample sizes"
-  print vNS, vNB, "testing sample sizes"
+  print NS-tNS, NB-tNB, "testing sample sizes"
+
+  #sys.exit("donesies")
 
 
   factory.AddSignalTree(TInS_cut)
@@ -570,7 +571,7 @@ INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt']
 INPUTVARS_ZZ = ['mtzh','met','zpt','DeltaR'] #v4
 
 INPUTVARS_ZZ = ['mtzh','met','zpt','l2pt','DeltaR','llphi','phil2met','qphi','s2qphi','metPzptOVERl1ptPl2pt','ThetaBYllphi'] #v11
-INPUTVARS_ZZ += ['etadiffBYllphi','l1pt','phil1met','etadiff','llphiSUBZmetphi'] #v16
+#INPUTVARS_ZZ += ['etadiffBYllphi','l1pt','phil1met','etadiff','llphiSUBZmetphi'] #v16
 
 
 # INPUTVARS_ZZvsBKGD += ['llphiSUBZmetphi',"Boost22"]#'Boost11','Boost22',
@@ -655,19 +656,19 @@ SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZZ]]
 # os.system("rm weights/TMVA*"+TeV+"*.weights.xml") #Remove previously existing weights
 # os.system("rm weights/TMVA*"+TeV+"*.class.C")
 
-# for sb in SBpairs:
-#   for rr in range(5):
-#     if (rr==0):# or (rr==4) or (rr==2):
-#       TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,rr)
+for sb in SBpairs:
+  for rr in range(5):
+    if (rr==0):# or (rr==4) or (rr==2):
+      TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,rr)
 
 
 ########################################################################## APPLICATION
 
-# inputfileslist=['ZH125.root','ZZ.root']
-outputdir = inputdir + "OUT_v16Q/"
-os.system("mkdir "+outputdir)
-for a in inputfileslistorig:
-  MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
+# # inputfileslist=['ZH125.root','ZZ.root']
+# outputdir = inputdir + "OUT_v16Q/"
+# os.system("mkdir "+outputdir)
+# for a in inputfileslistorig:
+#   MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
 
 
 ##############################################################################################
