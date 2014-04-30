@@ -130,27 +130,27 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
   bkgdname = inputfiles[1].split("/")[-1].replace('.root','')
   suffix = signame + "vs" + bkgdname + energy + str(RR)
 
-  NB = TInB.GetEntries()
-  NS = TInS.GetEntries()
-  print NS, NB, "INITIAL N" + "*"*20
+  # NB = TInB.GetEntries()
+  # NS = TInS.GetEntries()
+  # print NS, NB, "INITIAL N" + "*"*20
 
-  GG = 0.8
-  #PPP = 0.66
-  PPP = 0.5
-  #tNS = ((1.0*NS)/13.0)*PPP*GG
-  #tNB = ((1.0*NB)/13.0)*PPP*GG
-  tNS = ((1.0*NS)/1.0)*PPP*GG
-  tNB = ((1.0*NB)/1.0)*PPP*GG
-  vNS = tNS*(1.0-GG)/GG
-  vNB = tNB*(1.0-GG)/GG
-  tNS = round(tNS)
-  tNB = round(tNB)
-  vNS = round(vNS)
-  vNB = round(vNB)
+  # GG = 0.8
+  # PPP = 0.66
+  # #PPP = 0.5
+  # #tNS = ((1.0*NS)/13.0)*PPP*GG
+  # #tNB = ((1.0*NB)/13.0)*PPP*GG
+  # tNS = ((1.0*NS)/1.0)*PPP*GG
+  # tNB = ((1.0*NB)/1.0)*PPP*GG
+  # vNS = tNS*(1.0-GG)/GG
+  # vNB = tNB*(1.0-GG)/GG
+  # tNS = round(tNS)
+  # tNB = round(tNB)
+  # vNS = round(vNS)
+  # vNB = round(vNB)
 
-  print NS, NB, "signal/background"
-  print tNS, tNB, "training sample sizes"
-  print vNS, vNB, "testing sample sizes"
+  # print NS, NB, "signal/background"
+  # print tNS, tNB, "training sample sizes"
+  # print vNS, vNB, "testing sample sizes"
 
   TMVA.Tools.Instance()
    
@@ -180,6 +180,29 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
   TInS_cut = TInS.CopyTree(sigcut)
   TInB_cut = TInB.CopyTree(bgcut)
+
+  NB = TInB_cut.GetEntries()
+  NS = TInS_cut.GetEntries()
+  print NS, NB, "INITIAL N" + "*"*20
+
+  GG = 0.8
+  PPP = 0.66
+  #PPP = 0.5
+  #tNS = ((1.0*NS)/13.0)*PPP*GG
+  #tNB = ((1.0*NB)/13.0)*PPP*GG
+  tNS = ((1.0*NS)/1.0)*PPP*GG
+  tNB = ((1.0*NB)/1.0)*PPP*GG
+  vNS = tNS*(1.0-GG)/GG
+  vNB = tNB*(1.0-GG)/GG
+  tNS = round(tNS)
+  tNB = round(tNB)
+  vNS = round(vNS)
+  vNB = round(vNB)
+
+  print NS, NB, "signal/background"
+  print tNS, tNB, "training sample sizes"
+  print vNS, vNB, "testing sample sizes"
+
 
   factory.AddSignalTree(TInS_cut)
   factory.AddBackgroundTree(TInB_cut)
@@ -217,8 +240,8 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
 
   if "BDT" in methods:
-    bdttrees = ['1000','2000']#,'1000','4000']#,'1000']#,'200','500','1000']
-    bdtdepth = ['3']#,'4']#,'5']
+    bdttrees = ['3000']#['2800','3000','3200']#,'3000','4000','5000']#,'2000','3000']#,'1000','4000']#,'1000']#,'200','500','1000']
+    bdtdepth = ['4']#,'4']#,'4']#,'5']
     for tt in bdttrees:
       for dd in bdtdepth:
         factory.BookMethod(TMVA.Types.kBDT, "BDT"+str(tt)+str(dd) + suffix,
@@ -236,12 +259,27 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
                                "PruneMethod=NoPruning",
                                ]))
 
+    # factory.BookMethod(TMVA.Types.kBDT, "BDT31003" + suffix,
+    #                ":".join([
+    #                    "!H",
+    #                    "!V",
+    #                    "NTrees=3100",
+    #                    #"NTrees=1000",
+    #                    #"nEventsMin=150",
+    #                    "MaxDepth=3", #2
+    #                    "BoostType=AdaBoost",
+    #                    "AdaBoostBeta=0.5",
+    #                    "SeparationType=GiniIndex",
+    #                    "nCuts=-1",
+    #                    "PruneMethod=NoPruning",
+    #                    ]))
+
 
 
 
   if "Likelihood" in methods:
-    SMOOTH = ['0']#,'4']#,'6','9','10']
-    NBINS = ['20']#,'30']
+    SMOOTH = ['2']#['0','2','4']#,'4']#,'6','9','10']
+    NBINS = ['20']#,'10','30']
     NA = []#['100']#['10','25','50','100']
     for sm in SMOOTH:
       for nb in NBINS:
@@ -500,37 +538,11 @@ def MakeTrialFile(Twofiles):
 ############################################################################################### INPUTS FOR MVA
 
 #WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT" #may need to do cuts prior to this
-WEIGHTING = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*WT_replace"#*Wscale*Zscale"
-CUTTING = "(trainingH_replace>0.0)"
+WEIGHTING = "Eweight*XS2*BR2*LUM*(1/NGE)*(B2/B3)*WT_replace"#*Wscale*Zscale"
+CUTTING = "(training_replace>0.5)"#*(sys > 0.5)"#*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(Zmetphi > 2.6)"
 #CUTTING = "(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*(pBveto>0.0)*(training_replace>0.0)" #no raw booleans! put (bool > 0.0)
 #CUTTING += '*(finstate < 1.5)'
 #CUTTING = "training*(Zmetphi > 2.6)*(REDmet > 110)*((met/zpt)>0.8)*((met/zpt)<1.2)*(mass > 76)*(mass < 106)*pBveto"
-
-# INPUTVARS = ['phil1met','phil2met','Thrust','DeltaPz','DeltaPhi_ZH','TransMass3','TransMass4','CScostheta','CMsintheta']
-# INPUTVARS += ['Theta_lab','ZL2_lab','ZL1_lab','ZL1_Boost','ZRapidity','Lep2Dover3D','ZMEToverLep3D','l1l2metPt','l1l2minusmetPt']
-# INPUTVARS +=['REDmet','zpt','l2pt','l1pt','llphi','zeta','met']
-# INPUTVARS +=['Boost11','Boost22']
-
-# INPUTVARS_ZZvsBKGD = INPUTVARS + ['mass']
-################################################################################################
-# INPUTVARS = ['TransMass3','l1pt','DeltaPhi_ZH','Theta_lab','phil2met','ZRapidity','CScostheta','CMsintheta']
-# INPUTVARSboost = ['Boost11','Boost22']
-# INPUTVARSx = ['l1l2metPt','l1l2minusmetPt','ZL2_lab','ZL1_lab','ZL1_Boost']
-# INPUTVARSmt = ['mt_max','mt_11','mt_22','mt_21','mt_12']
-# INPUTVARS += INPUTVARSboost + INPUTVARSmt + INPUTVARSx
-# INPUTVARS_ZZvsBKGD = INPUTVARS + ['mass']
-#INPUTVARS = ['l1pt','TransMass3','l1Err','l2Err','CMsintheta','Boost11','Boost22','Theta_lab','DeltaPhi_ZH','phil2met','ZRapidity','CScostheta','l1l2metPt']
-#INPUTVARS = ['l1pt','l2pt','TransMass3','REDmetmetphi','l1Err','l2Err','Lep2Dover3D','ZMEToverLep3D','l1l2minusmetPt','baldiff','ColinSoper','CMsintheta','Boost11','Boost22','Theta_lab','DeltaPhi_ZH','phil2met','ZRapidity','l1l2metPt','ZL2_lab','ZL1_lab','ZL1_Boost']
-# INPUTVARS += ['(l1eta-l2eta)*(llphi)','Theta_lab*llphi','llphi-Zmetphi']#,'Theta_lab*Zmetphi']#'Theta_lab*Zmetphi','llphi','Zmetphi','(l1eta-l2eta)*Zmetphi','(zeta-l1eta)*Zmetphi']#,'l1l2minusmetPt'] #'(zeta-l2eta)*(zphi-l2phi)','(l1eta-l2eta)*(l1phi-l2phi)*(l1pt-l2pt)'
-# INPUTVARS += ['(met-l1pt)']#'(zpt/l1pt)','(l1pt-l2pt)','(met-l2pt)','(zpt-met)','(zpt-l2pt)']'(zpt-l1pt)'
-# #INPUTVARS += ['(l1pt*(l1phi-metphi)-l2pt*(l2phi-metphi))','(l1pt*(l1phi-zphi)-l2pt*(l2phi-zphi))','(l1pt*(l1phi-zphi)-l2pt*(l2phi-zphi))','(l1pt*(l1eta-zeta)-l2pt*(l2eta-zeta))']
-# INPUTVARS += ['(met/l1pt)','(met+zpt)/(l1pt+l2pt)']#'(l1pt/l2pt)','(met/l2pt)','(zpt/met)','(zpt/l2pt)']'(met-zpt)/(l1pt-l2pt+0.001)'
-# #INPUTVARS += ['(Zmetphi)/(llphi+0.001)']#,'l1pt+l2pt+met','zpt+met']#,'(l1pt+l2pt)/zpt','(l1pt+l2pt+met)/(zpt+met)']
-# #INPUTVARS = ['TransMass3','mass','l1Err','l2Err','l1pt','DeltaPhi_ZH','Theta_lab','phil2met']
-#INPUTVARS_ZZvsBKGD = INPUTVARS
-#INPUTVARS_ZZvsBKGD = ['TransMass3','Zmetphi','fabs(etadiffBYllphi)','llphiSUBZmetphi','metPzptOVERl1ptPl2pt','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llphi)','l2pt','metMl1pt']
-# INPUTVARS_ZZvsBKGD = ['zpt','etadiffBYllphi','ThetaBYllphi','metOVERl1pt','metPzptOVERl1ptPl2pt','DeltaR'] #'Theta_lab'
-# INPUTVARS_ZZvsBKGD += ['llphiSUBZmetphi']#'Boost11','Boost22',
 
 INPUTVARS = ['l2pt','TransMass3','DeltaPhi_ZH']#'ColinSoper','phil2met'] #'l1Err','l2Err'
 
@@ -545,22 +557,32 @@ INPUTVARS_ZZ = ['mtzh','ThetaBYllphi']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR
 INPUTVARS_ZZ += ['qphi','s2qphi']
 INPUTVARS_ZZ += ['etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR','llphiSUBZmetphi'] #['l1pt','l2pt','met','REDmet','zpt','zpt/(l1pt+l2pt)'
 INPUTVARS_ZZ += ['l1pt','l2pt','zpt','met','llphi','phil2met','phil1met','etadiff']
-INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt','l2pt','phil1met','DeltaR','llphiSUBZmetphi','s2qphi']
+#INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt','l2pt','phil1met','DeltaR','llphiSUBZmetphi','s2qphi']
 # INPUTVARS_ZZ = ['etadiffBYllphi','mtzh','Theta_lab','metPzptOVERl1ptPl2pt','DeltaR','l2pt','s2qphi']
 # INPUTVARS_ZZ = ['l2pt','metPzptOVERl1ptPl2pt','etadiffBYllphi','DeltaR','Theta_lab','mtzh']
-#INPUTVARS_ZZ = ['etadiffBYllphi','mtzh']
+INPUTVARS_ZZ = ['llphi','mtzh']
+#INPUTVARS_ZZ = ['mtzh','l1pt','l2pt','met','DeltaR','llphi','phil2met','zpt','Theta_lab']
+# INPUTVARS_ZZ = ['mtzh','l2pt','DeltaR','phil1met']
+# INPUTVARS_ZZ = ['mtzh', 'llphi', 'l2pt']
+INPUTVARS_ZZ = ['mtzh','DeltaR','l2pt','llphi']
+INPUTVARS_ZZ = ['mtzh','met','zpt','l1pt','l2pt']
+INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt']
+INPUTVARS_ZZ = ['mtzh','met','zpt','DeltaR'] #v4
+
+INPUTVARS_ZZ = ['mtzh','met','zpt','l2pt','DeltaR','llphi','phil2met','qphi','s2qphi','metPzptOVERl1ptPl2pt','ThetaBYllphi'] #v11
+INPUTVARS_ZZ += ['etadiffBYllphi','l1pt','phil1met','etadiff','llphiSUBZmetphi'] #v16
 
 
 # INPUTVARS_ZZvsBKGD += ['llphiSUBZmetphi',"Boost22"]#'Boost11','Boost22',
 # #INPUTVARS_ZZvsBKGD += ['ZRapidity']
 #['Lep2Dover3D','ZMEToverLep3D','ZMEToverLep2D','l1l2metPt','l1l2minusmetPt','ZL2_lab','ZL1_lab','ZL1_Boost','metMl1pt',''llphiSUBZmetphi''] #'(llphi*llphi)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)','(phil1met*phil1met)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)',
 #METHODS = ["KNN","BDT","Likelihood","Fisher"]
-METHODS = ["Likelihood","BDT"]#,"BDT"]#,"SVM"]#,"SVM"]#,"BDT"]#,"SVM"]#,"CFMlpANN","MLP","SVM"]
+METHODS = ["BDT"]#,"Likelihood"]#,"Likelihood"]#,"Likelihood"]#,"BDT"]#,"SVM"]#,"SVM"]#,"BDT"]#,"SVM"]#,"CFMlpANN","MLP","SVM"]
 
 #inputdir = "/tmp/chasco/INIT/HADD/TMVA/" #automate this, and the hadding
 #inputdir = "/afs/cern.ch/work/c/chasco/WDS_7/"
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/"
-inputdir = "/afs/cern.ch/work/c/chasco/MAR18_8/"
+inputdir = "/afs/cern.ch/work/c/chasco/MAR29_8/"
 TeV = "8"
 SkipLowStats = False
 Dibosons = True
@@ -633,16 +655,16 @@ SBpairs += [["ZH125.root","BKGDandZZ.root",INPUTVARS_ZZ]]
 # os.system("rm weights/TMVA*"+TeV+"*.weights.xml") #Remove previously existing weights
 # os.system("rm weights/TMVA*"+TeV+"*.class.C")
 
-for sb in SBpairs:
-  for rr in range(5):
-    if (rr==0):
-      TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,rr)
+# for sb in SBpairs:
+#   for rr in range(5):
+#     if (rr==0):# or (rr==4) or (rr==2):
+#       TrainingTesting(inputdir,sb,"tmvatree",WEIGHTING,CUTTING,CUTTING,METHODS,TeV,rr)
 
 
 ########################################################################## APPLICATION
 
 # inputfileslist=['ZH125.root','ZZ.root']
-outputdir = inputdir + "OUT_v7d/"
+outputdir = inputdir + "OUT_v16Q/"
 os.system("mkdir "+outputdir)
 for a in inputfileslistorig:
   MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
