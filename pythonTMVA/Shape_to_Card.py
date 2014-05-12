@@ -54,6 +54,9 @@ def MakeCard(lep,afile,adir,siglist,intlist,numlist,length,dat,stats):
 	tablelist.write("QCDscale_VH\tlnN" + "\t1.072" + "\t-"*(length-1) + "\n")
 	tablelist.write("CMS_Zjets_8TeV\tlnN" + "\t-"*3 + "\t2.0"*2 + "\t-"*(length-5) + "\n")
 
+	# tablelist.write("DYstat_10to50\tgmN\t0" + "\t-"*3 + "\t2.52" + "\t-"*(length-4) + "\n")
+	# tablelist.write("DYstat_50toInf\tgmN\t0" + "\t-"*4 + "\t2.48" + "\t-"*(length-5) + "\n")
+
 	tablelist.write("jer\tshape" + "\t1.0"*3 + "\t-"*(length-3) + "\n")
 	tablelist.write("jes\tshape" + "\t1.0"*3 + "\t-"*(length-3) + "\n")
 	tablelist.write("umet\tshape" + "\t1.0"*3 + "\t-"*(length-3) + "\n")
@@ -118,7 +121,7 @@ def Gutsoffile(f):
 
 
 
-sdir = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/TMVA/v11E/"
+sdir = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/TMVA/vB20/"
 
 files = os.listdir(sdir)
 #infiles=[]
