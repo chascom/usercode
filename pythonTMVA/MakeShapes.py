@@ -25,7 +25,7 @@ syst = ["","_jerup","_jerdown","_jesup","_jesdown","_umetup","_umetdown","_lesup
 
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/OUT_v8_WR/"
 N = ["8"]
-dirr = "vB20"
+dirr = "v4DD"
 os.system("mkdir "+dirr)
 
 randv = "0" #the random number separation (0-4)
@@ -38,11 +38,12 @@ CUTTINGT = "(training"+randv+"<0.5)" #application sample only
 CUTTINGTO = "(1-"+CUTTINGT+")"
 EE = "(finstate > 1.5)"
 MM = "(finstate < 1.5)"
+LL = "1.0"
 
 #VARS = ['mtzh','l2pt','DeltaR']
 #VARS = ['phil2met','metPzptOVERl1ptPl2pt']
-#VARS = ['l1pt','zpt','met','qphi']
-# VARS = ['s2qphi','llphi','ThetaBYllphi']
+VARS = ['l1pt','zpt','met','qphi']
+VARS = ['s2qphi','llphi','ThetaBYllphi']
 VARS = []
 #VARS = ['mtzh']#['Theta_lab']#['llphi','phil2met','phil1met','etadiff']
 #VARS = ['CScostheta','CMsintheta','ColinSoper']
@@ -50,11 +51,13 @@ VARS = []
 #VARS = []
 #VARS = ['metMl1pt','metOVERl1pt','DeltaPz']
 #VARS = ['ZL1_Boost','Boost11','Boost22']
-MVA = ['BDT20003']#,'BDT21003','BDT22003']
-#MVA = ['BDT20003','BDT21003','BDT22003']
+MVA = []
+MVA = ['BDT20004','BDT22004','BDT25004','BDT2r004']
+# MVA = ['BDT20003','BDT21003','BDT22003']
+# MVA = ['BDT26003','BDT2r003']#,'BDT25003']#,'BDT2r004']
 #MVA = ['BDT23004','BDT24004','BDT25004','BDT26004','BDT2r004']#,'BDT24003','BDT25003']
 #MVA = ['Likelihoodbin215','Likelihoodbin225','Likelihoodbin015','Likelihoodbin025']
-#MVA= ['Likelihoodbin220','Likelihoodbin420','Likelihoodbin210','Likelihoodbin410']
+MVA= ['Likelihoodbin220','Likelihoodbin020','Likelihoodbin210','Likelihoodbin010']
 # BBB = ['bin','evt']
 # SMOOTH = ['0','1','2','3','4','5','6','9','10']
 # NBINS = ['15','20','25','30']
@@ -85,7 +88,7 @@ print VARS
 #for n in N:
 n="8"
 print n, "TeV", "="*20
-inputdir = "/afs/cern.ch/work/c/chasco/MAY6_"+n+"/OUT_v5B/"
+inputdir = "/afs/cern.ch/work/c/chasco/MAY6_"+n+"/OUT_v4D/"
 #inputdir = "/afs/cern.ch/work/c/chasco/MAR31_"+n+"/"
 TeV8 = True
 # TeV8 = False
@@ -118,7 +121,7 @@ print inputdirlistroot
 # _min = 0.0
 # _max = 1.0
 
-treeNameLEP = [["muons","MM",MM],["electrons","EE",EE]]
+treeNameLEP = [["muons","MM",MM],["electrons","EE",EE],["combined","LL",LL]]
 
 for LEP in treeNameLEP:
 	print LEP

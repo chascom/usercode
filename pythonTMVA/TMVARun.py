@@ -241,8 +241,8 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
 
   if "BDT" in methods:
-    bdttrees = ['3000']#['2800','3000','3200']#,'3000','4000','5000']#,'2000','3000']#,'1000','4000']#,'1000']#,'200','500','1000']
-    bdtdepth = ['4']#,'4']#,'4']#,'5']
+    bdttrees = ['1800','1900','2000','2100']#,'2500','2700']#['2300','2400','2500','2600','2700']#['2800','3000','3200']#,'3000','4000','5000']#,'2000','3000']#,'1000','4000']#,'1000']#,'200','500','1000']
+    bdtdepth = ['3','2']#,'4']#,'4']#,'5']
     for tt in bdttrees:
       for dd in bdtdepth:
         factory.BookMethod(TMVA.Types.kBDT, "BDT"+str(tt)+str(dd) + suffix,
@@ -279,8 +279,8 @@ def TrainingTesting(inputdir,inputfiles,inputtree,weightexpression,sigcut,bgcut,
 
 
   if "Likelihood" in methods:
-    SMOOTH = ['2']#['0','2','4']#,'4']#,'6','9','10']
-    NBINS = ['20']#,'10','30']
+    SMOOTH = ['2','1']#,'4']#,'6','9','10']
+    NBINS = ['25','20','15']
     NA = []#['100']#['10','25','50','100']
     for sm in SMOOTH:
       for nb in NBINS:
@@ -547,43 +547,45 @@ CUTTING = "(training_replace>0.5)"#*(sys > 0.5)"#*(REDmet > 110)*((met/zpt)>0.8)
 
 INPUTVARS = ['l2pt','TransMass3','DeltaPhi_ZH']#'ColinSoper','phil2met'] #'l1Err','l2Err'
 
-INPUTVARS += ['fabs(etadiffBYllphi)','ThetaBYllphi','llphiSUBZmetphi','metPzptOVERl1ptPl2pt','metMl1pt']#,'(llphi + Zmetphi)','(llphi*Zmetphi)']#,'metMl1pt' 'metOVERl1pt'
-INPUTVARS += ['fabs(l1eta-l2eta)','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llphi)',"llphi"]
+# INPUTVARS += ['fabs(etadiffBYllphi)','ThetaBYllphi','llphiSUBZmetphi','metPzptOVERl1ptPl2pt','metMl1pt']#,'(llphi + Zmetphi)','(llphi*Zmetphi)']#,'metMl1pt' 'metOVERl1pt'
+# INPUTVARS += ['fabs(l1eta-l2eta)','sqrt((l1eta-l2eta)*(l1eta-l2eta) + llphi*llphi)',"llphi"]
 
-INPUTVARS_ZZvsBKGD = ['TransMass3','DeltaPhi_ZH','metMl1pt','ThetaBYllphi']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR*DeltaR-2*etadiffBYllphi']#,'metPzptOVERl1ptPl2pt','Zmetphi*met/zpt','(met+zpt)','(l1pt+l2pt)','(l1pt+l2pt+met)','(l1pt+l2pt)/zpt']#,'DeltaR'] #'Theta_lab'
-INPUTVARS_ZZvsBKGD += ['llphi*llphi + phil2met*phil2met + phil1met*phil1met','(phil2met*phil2met)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)']
-INPUTVARS_ZZvsBKGD += ['etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR'] #['l1pt','l2pt','met','REDmet','zpt','zpt/(l1pt+l2pt)'
+# INPUTVARS_ZZvsBKGD = ['TransMass3','DeltaPhi_ZH','metMl1pt','ThetaBYllphi']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR*DeltaR-2*etadiffBYllphi']#,'metPzptOVERl1ptPl2pt','Zmetphi*met/zpt','(met+zpt)','(l1pt+l2pt)','(l1pt+l2pt+met)','(l1pt+l2pt)/zpt']#,'DeltaR'] #'Theta_lab'
+# INPUTVARS_ZZvsBKGD += ['llphi*llphi + phil2met*phil2met + phil1met*phil1met','(phil2met*phil2met)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)']
+# INPUTVARS_ZZvsBKGD += ['etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR'] #['l1pt','l2pt','met','REDmet','zpt','zpt/(l1pt+l2pt)'
 
-INPUTVARS_ZZ = ['mtzh','ThetaBYllphi']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR*DeltaR-2*etadiffBYllphi']#,'metPzptOVERl1ptPl2pt','Zmetphi*met/zpt','(met+zpt)','(l1pt+l2pt)','(l1pt+l2pt+met)','(l1pt+l2pt)/zpt']#,'DeltaR'] #'Theta_lab'
-INPUTVARS_ZZ += ['qphi','s2qphi']
-INPUTVARS_ZZ += ['etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR','llphiSUBZmetphi'] #['l1pt','l2pt','met','REDmet','zpt','zpt/(l1pt+l2pt)'
-INPUTVARS_ZZ += ['l1pt','l2pt','zpt','met','llphi','phil2met','phil1met','etadiff']
-#INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt','l2pt','phil1met','DeltaR','llphiSUBZmetphi','s2qphi']
-# INPUTVARS_ZZ = ['etadiffBYllphi','mtzh','Theta_lab','metPzptOVERl1ptPl2pt','DeltaR','l2pt','s2qphi']
-# INPUTVARS_ZZ = ['l2pt','metPzptOVERl1ptPl2pt','etadiffBYllphi','DeltaR','Theta_lab','mtzh']
-INPUTVARS_ZZ = ['llphi','mtzh']
-#INPUTVARS_ZZ = ['mtzh','l1pt','l2pt','met','DeltaR','llphi','phil2met','zpt','Theta_lab']
-# INPUTVARS_ZZ = ['mtzh','l2pt','DeltaR','phil1met']
-# INPUTVARS_ZZ = ['mtzh', 'llphi', 'l2pt']
-INPUTVARS_ZZ = ['mtzh','DeltaR','l2pt','llphi']
-INPUTVARS_ZZ = ['mtzh','met','zpt','l1pt','l2pt']
-INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt']
-INPUTVARS_ZZ = ['mtzh','met','zpt','DeltaR'] #v4
+# INPUTVARS_ZZ = ['mtzh','ThetaBYllphi']#,'DeltaR*DeltaR+2*etadiffBYllphi','DeltaR*DeltaR-2*etadiffBYllphi']#,'metPzptOVERl1ptPl2pt','Zmetphi*met/zpt','(met+zpt)','(l1pt+l2pt)','(l1pt+l2pt+met)','(l1pt+l2pt)/zpt']#,'DeltaR'] #'Theta_lab'
+# INPUTVARS_ZZ += ['qphi','s2qphi']
+# INPUTVARS_ZZ += ['etadiffBYllphi','metPzptOVERl1ptPl2pt','DeltaR','llphiSUBZmetphi'] #['l1pt','l2pt','met','REDmet','zpt','zpt/(l1pt+l2pt)'
+# INPUTVARS_ZZ += ['l1pt','l2pt','zpt','met','llphi','phil2met','phil1met','etadiff']
+# #INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt','l2pt','phil1met','DeltaR','llphiSUBZmetphi','s2qphi']
+# # INPUTVARS_ZZ = ['etadiffBYllphi','mtzh','Theta_lab','metPzptOVERl1ptPl2pt','DeltaR','l2pt','s2qphi']
+# # INPUTVARS_ZZ = ['l2pt','metPzptOVERl1ptPl2pt','etadiffBYllphi','DeltaR','Theta_lab','mtzh']
+# INPUTVARS_ZZ = ['llphi','mtzh']
+# #INPUTVARS_ZZ = ['mtzh','l1pt','l2pt','met','DeltaR','llphi','phil2met','zpt','Theta_lab']
+# # INPUTVARS_ZZ = ['mtzh','l2pt','DeltaR','phil1met']
+# # INPUTVARS_ZZ = ['mtzh', 'llphi', 'l2pt']
+# INPUTVARS_ZZ = ['mtzh','DeltaR','l2pt','llphi']
+# INPUTVARS_ZZ = ['mtzh','met','zpt','l1pt','l2pt']
+# INPUTVARS_ZZ = ['mtzh','metPzptOVERl1ptPl2pt']
+# INPUTVARS_ZZ = ['mtzh','met','zpt','DeltaR'] #v4
 
 INPUTVARS_ZZ = ['mtzh','met','zpt','l2pt','DeltaR','llphi','phil2met','qphi','s2qphi','metPzptOVERl1ptPl2pt','ThetaBYllphi'] #v11
 #INPUTVARS_ZZ += ['etadiffBYllphi','l1pt','phil1met','etadiff','llphiSUBZmetphi'] #v16
+INPUTVARS_ZZ = ['met','l2pt','DeltaR','phil2met','metPzptOVERl1ptPl2pt'] #v4
+INPUTVARS_ZZ = ['mtzh','met','zpt','DeltaR']
 
 
 # INPUTVARS_ZZvsBKGD += ['llphiSUBZmetphi',"Boost22"]#'Boost11','Boost22',
 # #INPUTVARS_ZZvsBKGD += ['ZRapidity']
 #['Lep2Dover3D','ZMEToverLep3D','ZMEToverLep2D','l1l2metPt','l1l2minusmetPt','ZL2_lab','ZL1_lab','ZL1_Boost','metMl1pt',''llphiSUBZmetphi''] #'(llphi*llphi)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)','(phil1met*phil1met)/(llphi*llphi + phil2met*phil2met + phil1met*phil1met)',
 #METHODS = ["KNN","BDT","Likelihood","Fisher"]
-METHODS = ["BDT"]#,"Likelihood"]#,"Likelihood"]#,"Likelihood"]#,"BDT"]#,"SVM"]#,"SVM"]#,"BDT"]#,"SVM"]#,"CFMlpANN","MLP","SVM"]
+METHODS = ["BDT","Likelihood"]#,"Likelihood"]#,"Likelihood"]#,"Likelihood"]#,"BDT"]#,"SVM"]#,"SVM"]#,"BDT"]#,"SVM"]#,"CFMlpANN","MLP","SVM"]
 
 #inputdir = "/tmp/chasco/INIT/HADD/TMVA/" #automate this, and the hadding
 #inputdir = "/afs/cern.ch/work/c/chasco/WDS_7/"
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/"
-inputdir = "/afs/cern.ch/work/c/chasco/MAR29_8/"
+inputdir = "/afs/cern.ch/work/c/chasco/MAY6_8/"
 TeV = "8"
 SkipLowStats = False
 Dibosons = True
@@ -615,7 +617,7 @@ APFILES = []
 print inputfileslistorig, "I"*100
 print combofileslist, "C"*100
 
-print len(INPUTVARS), ":NUMBER OF INPUTVARS"
+print len(INPUTVARS_ZZ), ":NUMBER OF INPUTVARS"
 
 #################################################################################################### HADDING
 print bkgdlist #merge non-ZZ, non-ZH bkgds
@@ -664,11 +666,11 @@ for sb in SBpairs:
 
 ########################################################################## APPLICATION
 
-# # inputfileslist=['ZH125.root','ZZ.root']
-# outputdir = inputdir + "OUT_v16Q/"
-# os.system("mkdir "+outputdir)
-# for a in inputfileslistorig:
-#   MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
+# inputfileslist=['ZH125.root','ZZ.root']
+outputdir = inputdir + "OUT_v4E/"
+os.system("mkdir "+outputdir)
+for a in inputfileslistorig:
+  MVAApplication(a,"tmvatree",METHODS,inputdir,outputdir,SBpairs,TeV)
 
 
 ##############################################################################################
