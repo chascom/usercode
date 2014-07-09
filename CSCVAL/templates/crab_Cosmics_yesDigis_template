@@ -24,7 +24,7 @@ storage_element = T2_CH_CAF
 [GRID]
 rb                      = CERN 
 proxy_server            = myproxy.cern.ch 
-dont_check_proxy        = 1
+#dont_check_proxy        = 1
 virtual_organization    = cms
 retry_count             = 0
 lcg_catalog_type        = lfc

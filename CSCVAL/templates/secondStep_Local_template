@@ -8,16 +8,16 @@ import ROOT
 from ROOT import TFile
 
 #unzip output
-currentDir = os.popen("ls").readlines()
-for line in currentDir:
-    line = line.rstrip("\n")
-    test = line.find("crab_0",0,20)
-    if test == 0:
-        crabDir=line
-outputDir = os.popen("ls "+crabDir+"/res/*.tgz").readlines()
-for line in outputDir:
-    line = line.rstrip("\n")
-    os.system("tar -xzvf "+line)
+#currentDir = os.popen("ls").readlines()
+#for line in currentDir:
+#    line = line.rstrip("\n")
+#    test = line.find("crab_0",0,20)
+#    if test == 0:
+#        crabDir=line
+#outputDir = os.popen("ls "+crabDir+"/res/*.tgz").readlines()
+#for line in outputDir:
+#    line = line.rstrip("\n")
+#    os.system("tar -xzvf "+line)
 
 print "unzipped output"
 

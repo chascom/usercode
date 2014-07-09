@@ -33,7 +33,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 
-process.cscValidation = cms.EDAnalyzer("CSCValidation",
+process.cscValidation = cms.EDFilter("CSCValidation",
     rootFileName = cms.untracked.string('OUTFILE'),
     isSimulation = cms.untracked.bool(False),
     writeTreeToFile = cms.untracked.bool(True),

@@ -9,15 +9,15 @@ from ROOT import TFile
 
 #unzip output
 currentDir = os.popen("ls").readlines()
-for line in currentDir:
-    line = line.rstrip("\n")
-    test = line.find("crab_0",0,20)
-    if test == 0:
-        crabDir=line
-outputDir = os.popen("ls "+crabDir+"/res/*.tgz").readlines()
-for line in outputDir:
-    line = line.rstrip("\n")
-    os.system("tar -xzvf "+line)
+#for line in currentDir:
+#    line = line.rstrip("\n")
+#    test = line.find("crab_0",0,20)
+#    if test == 0:
+#        crabDir=line
+#outputDir = os.popen("ls "+crabDir+"/res/*.tgz").readlines()
+#for line in outputDir:
+#    line = line.rstrip("\n")
+#    os.system("tar -xzvf "+line)
 
 print "unzipped output"
 
@@ -38,7 +38,8 @@ print "made plots"
 #make the web page
 os.system("mkdir /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER")
 os.system("mkdir /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM")
-os.system("mkdir /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site")
+#os.system("mkdir /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site")
+#os.system("mkdir /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site/PNGS")
 os.system("cp -r ../../web/* /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM")
 os.system("mv Summary.html /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site")
 os.system("mv hot_wires.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site/PNGS")
@@ -46,7 +47,7 @@ os.system("mv bad_TPE_chambers.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/
 os.system("mv TPEHists.root /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site/PNGS")
 os.system("mv deadchamberlist.txt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site/PNGS")
 os.system("mv CFGFILE /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site/PNGS/config.py")
-os.system("mv *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site/PNGS")
+os.system("cp *.png /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/results/runRUNNUMBER/STREAM/Site/PNGS")
 #os.system("mv OUTPUTFILE /afs/cern.ch/cms/CAF/CMSCOMM/COMM_CSC/CSCVAL/AUTOVAL/rootfiles/")
 
 print "make webpage"

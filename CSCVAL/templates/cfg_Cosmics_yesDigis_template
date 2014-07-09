@@ -84,5 +84,6 @@ process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('TPEHists.root')
                                    )
 
-process.p = cms.Path(process.gtDigis * process.muonCSCDigis * process.cscValidation * process.cscTriggerPrimitiveDigis * process.lctreader)
+#process.p = cms.Path(process.gtDigis * process.muonCSCDigis * process.cscValidation * process.cscTriggerPrimitiveDigis * process.lctreader)
 
+process.p = cms.Path(process.gtDigis * process.muonCSCDigis * process.csc2DRecHits * process.cscSegments * process.cscTriggerPrimitiveDigis * process.lctreader * process.cscValidation)

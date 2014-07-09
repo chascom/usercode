@@ -30,5 +30,5 @@ lfc_host                = lfc-cms-test.cern.ch
 lfc_home                = /grid/cms
 
 [CAF]
-queue = cmscaf8nh
+queue = cmscaf1nh
 
