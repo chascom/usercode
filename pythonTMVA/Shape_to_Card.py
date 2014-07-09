@@ -42,17 +42,17 @@ def MakeCard(lep,afile,adir,siglist,intlist,numlist,length,dat,stats):
 	tablelist.write("lumi_8TeV\tlnN" + "\t1.026"*3 + "\t-"*(length-3) + "\n") #order here corresponds to ZH, WZ, ZZ being first/ DY next/ NRB last
 	if "electron" in lep:
 		tablelist.write("CMS_eff_e\tlnN" + "\t1.03"*3 + "\t-"*(length-3) + "\n")
-		tablelist.write("CMS_NRB_8TeV\tlnN" + "\t-"*3 + "\t2.019"*(length-3) + "\n")
+		tablelist.write("CMS_NRB_8TeV\tlnN" + "\t-"*5 + "\t2.019"*(length-5) + "\n")
 	if "muon" in lep:
 		tablelist.write("CMS_eff_m\tlnN" + "\t1.04"*3 + "\t-"*(length-3) + "\n")
-		tablelist.write("CMS_NRB_8TeV\tlnN" + "\t-"*3 + "\t2.018"*(length-3) + "\n")
+		tablelist.write("CMS_NRB_8TeV\tlnN" + "\t-"*5 + "\t2.018"*(length-5) + "\n")
 	
 	tablelist.write("CMS_WZ\tlnN" + "\t-" + "\t1.01" + "\t-"*(length-2) + "\n")
 	tablelist.write("UEPS\tlnN" + "\t1.03" + "\t-"*(length-1) + "\n")
 	tablelist.write("pdf_qqbar\tlnN" + "\t1.055\t1.048\t1.057" + "\t-"*(length-3) + "\n")
 	tablelist.write("QCDscale_VV\tlnN" + "\t-" + "\t1.077\t1.067" + "\t-"*(length-3) + "\n")
 	tablelist.write("QCDscale_VH\tlnN" + "\t1.072" + "\t-"*(length-1) + "\n")
-	#tablelist.write("CMS_Zjets_8TeV\tlnN" + "\t-"*3 + "\t2.0"*2 + "\t-"*(length-5) + "\n")
+	tablelist.write("CMS_Zjets_8TeV\tlnN" + "\t-"*3 + "\t2.0"*2 + "\t-"*(length-5) + "\n")
 
 	# tablelist.write("DYstat_10to50\tgmN\t0" + "\t-"*3 + "\t2.52" + "\t-"*(length-4) + "\n")
 	# tablelist.write("DYstat_50toInf\tgmN\t0" + "\t-"*4 + "\t2.48" + "\t-"*(length-5) + "\n")
@@ -121,7 +121,7 @@ def Gutsoffile(f):
 
 
 
-sdir = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/TMVA/v4DD/"
+sdir = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/TMVA/v1_OPT20/"
 
 files = os.listdir(sdir)
 #infiles=[]
