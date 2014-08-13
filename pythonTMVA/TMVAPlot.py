@@ -80,13 +80,13 @@ def MakePlot2(nom,var,dicthist,name):
 	nom2 = []
 	for n in nom:
 		boolNRB = ('SingleT' in n) or ('TT' in n) or (('W' in n) and ('Jet' in n))
-		boolDY = ('DYJetsToLL_50toInf' in n)
+		boolDY = ('DYJetsToLL_50toInf' in n) or ('DYJetsToLL_10to50' in n)
 		if boolNRB:
 			NRBhist.add(dicthist[n])
 		if boolDY:
 			DYhist.add(dicthist[n])
-		if (not boolDY) and (not boolNRB) and ('WW' not in n) and ('DYJetsToLL_10to50' not in n):
-			print "not done"
+		# if (not boolDY) and (not boolNRB) and ('WW' not in n) and ('DYJetsToLL_10to50' not in n):
+		# 	print "not done"
 
 	for n in nom:
 		if ('data' not in n) and ('ZH' not in n):
@@ -122,6 +122,7 @@ def MakePlot(nom,var,dicthist,name):
 	hs = THStack("hs",name)
 	MAX = []
 	MAX.append(dicthist['data_obs'].GetMaximum())
+	print "DATA max:", MAX
 	color = 1
 	for n in nom:
 		MAX.append(dicthist[n].GetMaximum())
@@ -135,11 +136,12 @@ def MakePlot(nom,var,dicthist,name):
 			dicthist[n].SetFillColor(color)
 			hs.Add(dicthist[n])
 	print MAX, max(MAX)
-	dicthist['data_obs'].SetMaximum(2.5*max(MAX))
+	dicthist['data_obs'].SetMaximum(1.1*max(MAX))
+	hs.SetMaximum(1.1*max(MAX))
 	hs.Draw("HIST")
 	dicthist['ZH125'].SetLineStyle(1)
 	dicthist['ZH125'].SetLineWidth(1)
-	dicthist['ZH125'].SetLineColor(2)
+	dicthist['ZH125'].SetLineColor(1)
 	dicthist['ZH125'].Draw("HISTSAME")
 	dicthist['data_obs'].Draw("eSAME")
 
@@ -149,26 +151,58 @@ def MakePlot(nom,var,dicthist,name):
 	leg.SetFillColor(0)
 	leg.SetBorderSize(0)
 	for n in nom:
-		if ("DY" not in n):
-			leg.AddEntry(dicthist[n],n)
+		#if ("DY" not in n):
+		leg.AddEntry(dicthist[n],n)
 	leg.Draw("SAME")
 
-	c1.Print(name+".png")
+	c1.Print(oout+"/"+name+".png")
 	return
-dd = "v4DD/"
-rootfile = dd+"BDT20003ZH125vsBKGDandZZr0_LLTrue.root"
-rootfiles =[dd+"BDT20003ZH125vsBKGDandZZr0_MMTrue.root"]
-rootfiles +=[dd+"BDT20003ZH125vsBKGDandZZr0_EETrue.root"]
-#rootfiles +=[dd+"DeltaR_LLTrue.root"]
+dd = "v2alt_TMVA_40/"
+oout = "TMVAPLOT_"+dd
+os.system('mkdir '+oout)
+rootfiles = []
+# rootfile = dd+"BDT20003ZH125vsBKGDandZZr0_LLTrue.root"
+# rootfiles =[dd+"BDT20003ZH125vsBKGDandZZr0_MMTrue.root"]
+# rootfiles +=[dd+"BDT20003ZH125vsBKGDandZZr0_EETrue.root"]
+# rootfiles +=[dd+"Likelihoodbin120ZH125vsBKGDandZZr0_EETrue.root"]
+# rootfiles +=[dd+"Likelihoodbin120ZH125vsBKGDandZZr0_MMTrue.root"]
+# rootfiles +=[dd+"Likelihoodbin120ZH125vsBKGDandZZr0_LLTrue.root"]
+# rootfiles +=[dd+"mtzh_LLTrue.root"]
+# rootfiles +=[dd+"mtzh_EETrue.root"]
+# rootfiles +=[dd+"mtzh_MMTrue.root"]
+# rootfiles +=[dd+"zpt_LLTrue.root"]
+# rootfiles +=[dd+"zpt_EETrue.root"]
+# rootfiles +=[dd+"zpt_MMTrue.root"]
+# rootfiles +=[dd+"met_LLTrue.root"]
+# rootfiles +=[dd+"met_EETrue.root"]
+# rootfiles +=[dd+"met_MMTrue.root"]
+# rootfiles +=[dd+"DeltaR_LLTrue.root"]
 # rootfiles +=[dd+"metPzptOVERl1ptPl2pt_LLTrue.root"]
 # rootfiles +=[dd+"met_LLTrue.root"]
 # rootfiles +=[dd+"zpt_LLTrue.root"]
-
-H =SeeWhatsInTheFile(rootfile)
-N = PickOutNom(H[-1])
-# print H[1]
-# print N[0]
-MakePlot(N[0],N[1],H[1],rootfile.split("/")[-1].replace(".root",""))
+# rootfiles +=[dd+"blowout_MMTrue__0_0.root"]
+# rootfiles +=[dd+"blowout_EETrue__0_0.root"]
+# rootfiles +=[dd+"llphi_MMTrue__0_0.root"]
+# rootfiles +=[dd+"llphi_EETrue__0_0.root"]
+# rootfiles +=[dd+"met_MMTrue__0_0.root"]
+# rootfiles +=[dd+"met_EETrue__0_0.root"]
+# rootfiles +=[dd+"REDmet_MMTrue__0_0.root"]
+# rootfiles +=[dd+"REDmet_EETrue__0_0.root"]
+# rootfiles +=[dd+"Zmetphi_MMTrue__0_0.root"]
+# rootfiles +=[dd+"Zmetphi_EETrue__0_0.root"]
+# rootfiles +=[dd+"BDT4004ZH125vsBKGDandZZr0_MMTrue__0_0.root"]
+# rootfiles +=[dd+"BDT4004ZH125vsBKGDandZZr0_EETrue__0_0.root"]
+TT = ['400','2000','1000']
+for tt in TT:
+	rootfiles +=[dd+"BDT"+tt+"3ZH125vsBKGDandZZr0_MMTrue__0_0.root"]
+	rootfiles +=[dd+"BDT"+tt+"3ZH125vsBKGDandZZr0_EETrue__0_0.root"]
+	rootfiles +=[dd+"BDT"+tt+"4ZH125vsBKGDandZZr0_MMTrue__0_0.root"]
+	rootfiles +=[dd+"BDT"+tt+"4ZH125vsBKGDandZZr0_EETrue__0_0.root"]
+# H =SeeWhatsInTheFile(rootfile)
+# N = PickOutNom(H[-1])
+# # print H[1]
+# # print N[0]
+# MakePlot(N[0],N[1],H[1],rootfile.split("/")[-1].replace(".root",""))
 
 
 for rr in rootfiles:
