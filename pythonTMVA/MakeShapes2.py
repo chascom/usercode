@@ -20,22 +20,6 @@ def evtweight(XS,BR,B2,B3,NGE,LUM):
 	EVW = (LUM*XS*BR*(B2/B3))/NGE
 	return EVW
 
-
-ZHold105_EVW = evtweight(0.6750,0.100974,1.702,1.709,5.018*(10**4),1.97*(10**4))
-ZHold115_EVW = evtweight(0.5117,0.100974,1.747,1.755,5.0*(10**4),1.97*(10**4))
-ZHold125_EVW = evtweight(0.3943,0.100974,1.768,1.774,5.072*(10**4),1.97*(10**4))
-ZHold135_EVW = evtweight(0.3074,0.100974,1.784,1.792,5.04*(10**4),1.97*(10**4))
-ZHold145_EVW = evtweight(0.2424,0.100974,1.814,1.823,5.0*(10**4),1.97*(10**4))
-
-# ZH135_EVW = evtweight(0.3074,0.06732,1.368,1.375,2.604*(10**5),1.97*(10**4))
-# # ZH135_EVW = evtweight(0.3074,0.06732,2.75,2.76,5.229*(10**5),1.97*(10**4))
-# ZH145_EVW = evtweight(0.2424,0.06732,1.418,1.423,2.656*(10**5),1.97*(10**4))
-# ZH155_EVW = evtweight(0.1923,0.06732,1.379,1.383,2.552*(10**5),1.97*(10**4))
-# ZH175_EVW = evtweight(0.1267,0.06732,1.446,1.45,2.6*(10**5),1.97*(10**4))
-# ZH200_EVW = evtweight(0.07827,0.06732,1.482,1.486,2.608*(10**5),1.97*(10**4))
-# ZH115_EVW = evtweight(0.5117,0.06732,1.336,1.341,2.611*(10**5),1.97*(10**4))
-
-
 ZH135_EVW = evtweight(0.3074,0.06732,2.75,2.76,5.229*(10**5),1.97*(10**4))
 
 ZH145_EVW = evtweight(0.2424,0.06732,2.795,2.805,5.236*(10**5),1.97*(10**4))
@@ -48,6 +32,9 @@ ZH200_EVW = evtweight(0.07827,0.06732,1.482,1.486,2.608*(10**5),1.97*(10**4))
 ZH115_EVW = evtweight(0.5117,0.06732,2.664,2.674,5.208*(10**5),1.97*(10**4))
 
 ZH125_EVW = evtweight(0.3943,0.06732,2.589,2.596,4.905*(10**5),1.97*(10**4))
+# ZH135_EVW = evtweight(0.3074,0.06732,1.368,1.375,2.604*(10**5),1.97*(10**4))
+# ZH145_EVW = evtweight(0.2424,0.06732,1.418,1.423,2.656*(10**5),1.97*(10**4))
+ZH125_EVW = evtweight(0.3943,0.06732,2.589,2.596,4.905*(10**5),1.97*(10**4))
 ZZ_EVW = evtweight(0.355,1.0,2.721,2.734,9.549*(10**5),1.97*(10**4))
 WZ_EVW = evtweight(32.3,0.03272,7.123,7.149,2.003*(10**6),1.97*(10**4))
 print ZH125_EVW, ZZ_EVW, WZ_EVW, "event weights"
@@ -57,7 +44,7 @@ syst = ["","_jerup","_jerdown","_jesup","_jesdown","_umetup","_umetdown","_lesup
 #inputdir = "/afs/cern.ch/work/c/chasco/WW_8/Addon/OUT_v8_WR/"
 N = ["8"]
 # dirr = "v2_RS_debug" #"v2_CTRL
-dirr = "OUT_YYYY"
+dirr = "OUT_FFFF125"
 os.system("mkdir "+dirr)
 
 randv = "0" #the random number separation (0-4)
@@ -78,7 +65,7 @@ CUTTING = ""
 #CUTTING = "*(REDmet > 70)*(Zmetphi > 1.0)"
 #CUTTING = "*(Zmetphi > "+str(phicut)+")*(REDmet > "+str(redmetcut)+")"
 CUTOPT = "__"+str(phicut).replace(".","p") + "_" + str(redmetcut).replace(".","p")
-CUTTING = "*(llphi<=2.2)" #*("+varbs+" > -0.1)" #*(REDmet > 70)*(Zmetphi > 1.0)"
+CUTTING = "*(llphi<=2.2)" #*(REDmet > 70)*(Zmetphi > 1.0)"
 #CUTTING = "*(llphi<=2.2)*("+varbs+">-0.2)" #*(REDmet > 70)*(Zmetphi > 1.0)"
 CUTTINGT = "*(training"+randv+"<0.5)"+CUTTING #application sample only
 
@@ -147,6 +134,8 @@ print VARS
 
 #for n in N:
 inputdir = sys.argv[4]
+print inputdir
+#sys.exit("DONE")
 #inputdir = "/afs/cern.ch/work/c/chasco/MAR31_"+n+"/"
 TeV8 = True
 # TeV8 = False
@@ -283,10 +272,6 @@ for LEP in treeNameLEP:
 						if ("DY" in f):
 							WEIGHTINGX = WEIGHTING
 							CUTTINGX = CUTTING
-
-						# if ("ZH" in f):# and ("ZH125" not in f):
-						# 	WEIGHTINGX = WEIGHTING
-						# 	CUTTINGX = CUTTING
 							#print "$"*40
 							#print v+">>"+n+s.replace("up","Up").replace("down","Down"),modify+WEIGHTINGX+"*(sys"+s+">0.5)*"+LEP[2]+CUTTINGX
 
@@ -340,32 +325,12 @@ for LEP in treeNameLEP:
 									BinAdjU.SetBinContent(nn+1,1.14*WZ_EVW)
 								if ("ZZ" in f):
 									BinAdjU.SetBinContent(nn+1,1.14*ZZ_EVW)
-								if ("ZH115" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZH115_EVW)
 								if ("ZH125" in f):
 									BinAdjU.SetBinContent(nn+1,1.14*ZH125_EVW)
 								if ("ZH135" in f):
 									BinAdjU.SetBinContent(nn+1,1.14*ZH135_EVW)
 								if ("ZH145" in f):
 									BinAdjU.SetBinContent(nn+1,1.14*ZH145_EVW)
-								if ("ZH155" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZH155_EVW)
-								if ("ZH175" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZH175_EVW)
-								if ("ZH200" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZH200_EVW)
-									
-								if ("ZHold105" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZHold105_EVW)
-								if ("ZHold115" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZHold115_EVW)
-								if ("ZHold125" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZHold125_EVW)
-								if ("ZHold135" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZHold135_EVW)
-								if ("ZHold145" in f):
-									BinAdjU.SetBinContent(nn+1,1.14*ZHold145_EVW)
-								
 								# BinAdjD.Print("range")
 								# BinAdjU.Print("range")
 								exec('BinAdjU.Add('+n+s+')')
