@@ -22,7 +22,7 @@ import math
 import numpy
 import array
 import random
-from GrabHistos13 import *
+from GrabHistos22 import *
 
 ROOT.gStyle.SetOptStat(0)
 
@@ -83,9 +83,9 @@ def Make2DPlot(a_file,treename,variablepair,outputname,cut,pref):
   TestTree.Project('hTWO',variablepair[0]+':'+variablepair[1],cut)
 
   hTWO.Draw("COLZ")
-  hTWO.GetYaxis().SetTitle("GEN PT")
+  hTWO.GetYaxis().SetTitle("GEN PT [GeV]    ")
   hTWO.GetYaxis().SetTitleOffset(1.5)
-  hTWO.GetXaxis().SetTitle("RECO PT")
+  hTWO.GetXaxis().SetTitle("RECO PT [GeV]   ")
 
   line2 = TLine(0,0,1000,1000) #xy,xy
   line2.Draw("SAME")
@@ -121,10 +121,12 @@ def Make1DPlot(a_file,treename,variable,outputname,cut):
 
   hSig1=TH1F("hSig1","",nbins,tbinning)
   # hSig1=TH1F("hSig1","",bin,min_,max_)
-  #hSig1.Sumw2()
+  hSig1.Sumw2()
   
 
   TestTree.Project("hSig1",variable,cut)
+
+  print hSig1.Integral()
 
   # newBins = array.array("d",[0., 20., 45., 60., 80., 100., 200., 400., 1000.])
   # hSig = hSig1.Rebin(len(newBins)-1,"hSig",newBins)
@@ -143,6 +145,36 @@ def Make1DPlot(a_file,treename,variable,outputname,cut):
   #c5.Print(pref+outputname)
 
   return hSig1
+
+def Make1DPlotMCFM(a):
+  c5 = TCanvas("c5")
+  c5.SetLogy()
+  c5.SetLogx()
+  #gStyle.SetOptStat(1111111)
+
+  binset = [45., 80.,100., 200., 400., 1000.]
+  nbins = len(binset)-1
+  tbinning = array.array("d",binset)
+
+  hSig2=TH1F("hSig1","",nbins,tbinning)
+  L = 19.7
+  hSig2.SetBinContent(1,79.1*L)
+  hSig2.SetBinContent(2,23.3*L)
+  hSig2.SetBinContent(3,36.0*L)
+  hSig2.SetBinContent(4,5.2*L)
+  hSig2.SetBinContent(5,0.4*L)
+
+  hSig2.SetBinError(1,5.5*L)
+  hSig2.SetBinError(2,1.6*L)
+  hSig2.SetBinError(3,4*L)
+  hSig2.SetBinError(4,0.4*L)
+  hSig2.SetBinError(5,0.4*L)
+
+  #hSig2.Scale(0.5)
+  # hSig1=TH1F("hSig1","",bin,min_,max_)
+  #hSig1.Sumw2()
+
+  return hSig2
 
 def Make1DPlotGEN(a_file,treename,variable,outputname,cut):
   c5 = TCanvas("c5")
@@ -165,7 +197,7 @@ def Make1DPlotGEN(a_file,treename,variable,outputname,cut):
 
   hSig1=TH1F("hSig1","",nbins,tbinning)
   # hSig1=TH1F("hSig1","",bin,min_,max_)
-  #hSig1.Sumw2()
+  hSig1.Sumw2()
   
 
   TestTree.Project("hSig1",variable,cut)
@@ -198,6 +230,7 @@ def SubtractMany1DPlots(hA,HB):
     sys.exit("data and bkgd histos bins not equal!!")
 
   h_sub = hA.Clone()
+  h_sub.Sumw2()
   for hB in HB:
     h_sub.Add(hB,-1)
 
@@ -225,28 +258,46 @@ def main( optunf="Bayes" ):
     #c2 = TCanvas("c2")
     print "==================================== TRAIN ===================================="
     # Create response matrix object
-    inputdir = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/UNFOLDacc/HADD/UnfoldInput/"
-    inputdirWZ = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/UNFOLDWZ/HADD/UnfoldInput/"
-    inputdirNoPrep = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/ZZoutput/"
-    inputdirDY = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/DYbkgd/"
-    inputGEN = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/Unfolding/PT.root"
+    inputdirZZ = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/UNFOLDacc/HADD/UnfoldInput/" #ZZ
+    # inputdirWZ = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/UNFOLDWZ/HADD/UnfoldInput/" #WZ
+    # inputdirNoPrep = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/ZZoutput/" #data, NRB
+    inputdirDY = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/DYbkgd/" #gamma
+    #inputGEN = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/Unfolding/PT.root"
+
+    inputdir = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/EWKSET/HADD/UnfoldInput/" #ZZ
+    inputdirWZ = inputdir #WZ
+    inputdirNoPrep = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/EWKSET/" #data, NRB
+    #inputdirNoPrep2 = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/" #data, NRB
+    inputdir2 = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/NOSET/HADD/UnfoldInput/"
+    # inputdirWZ = inputdir
+
+    fw = '/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/Unfolding/MCFM_withAcceptance/ZZlept_tota_MSTW200_90__90__test.root'
+    fwo = '/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/Unfolding/MCFM_withoutAcceptance/ZZlept_tota_MSTW200_90__90__test.root'
+
+
+    #inputdirOTH = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/NOSET/HADD/UnfoldInput/"
+    #inputdirWZOTH = inputdirOTH
+
+    #inputdirEWK = "/afs/cern.ch/work/c/chasco/CMSSW_5_3_11/src/CMGTools/HtoZZ2l2nu/test/results/EWKSET/HADD/UnfoldInput/" #ZZ
 
     PAIR = ['zptG','zpt']
     outputnameGR = PAIR[0]+'_vs_'+PAIR[1]+'.png'
     outputnameG = PAIR[0]+'.png'
     outputnameR = PAIR[1]+'.png'
-    cutData = "(zpt>45)" #"preco"
+    cutData = "(zpt>45)*(preco>0)" #"preco"
 
     cutGMM = "((L1GId*L2GId)==-13*13)"
     cutRMM = "((l1id*l2id)==-13*13)"
     cutGEE = "((L1GId*L2GId)==-11*11)"
     cutREE = "((l1id*l2id)==-11*11)"
+    cutQQ ="(abs(l1id*l2id) == 11*13)"
 
     hsWW = makehistos("DataFused.root",inputdirNoPrep)
     hsDY = makehistosDY('gamma_out_8_MoreBins_ll.root',inputdirDY)
     print "MEASURED DATA "+"="*30
     hMeasMM = Make1DPlot(inputdirNoPrep+"DataFused.root","finalTree",PAIR[1],"Data.png",cutRMM + "*" + cutData)
     hMeasEE = Make1DPlot(inputdirNoPrep+"DataFused.root","finalTree",PAIR[1],"Data.png",cutREE + "*" + cutData)
+    #hMeasQQ = Make1DPlot(inputdirNoPrep+"DataFused.root","finalTree",PAIR[1],"Data.png",cutQQ + "*" + cutData)
     print "MEASURED DATA "+"="*30
 
     print hMeasMM.Integral(), hMeasEE.Integral(), "Measured"
@@ -255,7 +306,39 @@ def main( optunf="Bayes" ):
     print hsWW[0].Integral() , hsWW[1].Integral(), "WW"
     print hsDY[0].Integral() , hsDY[1].Integral(), "DY"
 
-    systematic = ['_jer','_jes','_umet','_les','_pu','_btag','_sherpa','_qcd','_pdf']
+    #MCFM rescaling and plotting
+    #
+    hMCFM = GetMCFMHisto(fwo,True)
+    hMCFM.Scale(143.2/hMCFM.Integral())
+    hMCFM = REBIN(hMCFM)
+
+    print hMCFM.Integral()
+    hMCFM.Print("range")
+
+    #sys.exit("donesies")
+
+    MWO = GetMCFMHisto(fwo,True)
+    MW = GetMCFMHisto(fw, False)
+    MWO.Divide(MW)
+
+    MWO.Print("range")
+
+    MWO = REBIN(MWO)
+
+    MWO.Print("range")
+
+    # MWO = REBIN(GetMCFMHisto(fwo,True))
+    # MW = REBIN(GetMCFMHisto(fw, False))
+
+    # MWO.Divide(MW)
+
+    # MWO.Print("range")
+
+    #sys.exit("donesies")
+
+
+    systematic = ['_jer','_jes','_umet','_les','_pu','_btag','_qcd','_pdf'] #'_jer','_jes','_umet','_les','_pu','_btag','_sherpa','_qcd','_pdf']
+    # systematic = ['_jer','_jes','_qcd','_pdf']
     UD = ['up','down']
     SYST_UD = ['']
     for syst in systematic:
@@ -282,6 +365,10 @@ def main( optunf="Bayes" ):
     hDiffsEE = []
     hClosesEE = []
     hunfoldsEE = []
+    ######
+    MCGenHistosMM2 = []
+    MCGenHistosEE2 = []
+    MCGenHistos2 = []
 
     for syst_ud in SYST_UD:
       print "=O"*40
@@ -291,10 +378,17 @@ def main( optunf="Bayes" ):
       cutR = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(preco>0)*"+SYS
       # cutG = "Eweight*BR*(B2/B3)*(pgen>0)*"+SYS #Accstring
       # [5718.8469039797783, 1737.4891278286839, 1737.4891278286839] fb
-
-      cutG = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(1/Acc2)*(pgen>0)*"+SYS #Accstring
+      #SSS = 2.1299863918*(3.0)
+      #SSS = 2.1299863918*(3.0/2.0)
+      #SSS = (3.0/2.0)
+      #SSS = (3.0)
+      #cutG = str(SSS)+"*Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(pgen>0)*"+SYS #Accstring
+      cutG = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(pgen>0)*"+SYS #Accstring
+      # cutG = str(SSS)+"*Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(1/Acc2)*(pgen>0)*"+SYS #Accstring
+      #cutG = str(SSS)+"*Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(pgen>0)*"+SYS #Accstring
       cutGR = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(pgen>0)*(preco>0)*"+SYS #+Accstring
       cutWZ = "Eweight*XS*BR*LUM*(1/NGE)*(B2/B3)*(preco>0)*"+SYS
+
       cutGEN = "XS*LUM*(1/NGE)*(B2/B3)*(g_pt>45.0)"
       cutee = "(ee>0.0)"
       cutmm = "(mumu>0.0)"
@@ -312,9 +406,15 @@ def main( optunf="Bayes" ):
       # MCGenHistoEE = Make1DPlotGEN(inputGEN,"GPT","g_pt",outputnameG,cutGEN+"*"+cutee)
       # MCGenHistoMM.Print("range")
       # sys.exit("done")
-      GenVsReco2DHistoMM = Make2DPlot(inputdir+"ZZ.root","tmvatree",PAIR,outputnameGR,cutGR+"*"+cutGMM+"*"+cutRMM,syst_ud)
-      GenVsReco2DHistoEE = Make2DPlot(inputdir+"ZZ.root","tmvatree",PAIR,outputnameGR,cutGR+"*"+cutGEE+"*"+cutREE,syst_ud)
+      GenVsReco2DHistoMM = Make2DPlot(inputdir+"ZZ.root","tmvatree",PAIR,'MM'+outputnameGR,cutGR+"*"+cutGMM+"*"+cutRMM,syst_ud)
+      GenVsReco2DHistoEE = Make2DPlot(inputdir+"ZZ.root","tmvatree",PAIR,'EE'+outputnameGR,cutGR+"*"+cutGEE+"*"+cutREE,syst_ud)
       # sys.exit("done")
+      #
+      MCGenHistoMM2 = Make1DPlotGEN(inputdir2+"ZZ.root","tmvatree",PAIR[0],outputnameG,cutG+"*"+cutGMM)
+      MCGenHistoEE2 = Make1DPlotGEN(inputdir2+"ZZ.root","tmvatree",PAIR[0],outputnameG,cutG+"*"+cutGEE)
+
+      #MCGenHistoMM2 = Make1DPlotMCFM(1)
+      #MCGenHistoEE2 = Make1DPlotMCFM(1)
 
 
       hWZMM = Make1DPlot(inputdirWZ+"WZ.root","tmvatree",PAIR[1],"WZ.png",cutWZ+"*"+cutRMM) #MC
@@ -335,9 +435,35 @@ def main( optunf="Bayes" ):
       hDiffMM = SubtractMany1DPlots(hMeasMM,BKGDSMM)
       hDiffEE = SubtractMany1DPlots(hMeasEE,BKGDSEE)
 
-      print hDiffMM.Integral()
-      print hDiffEE.Integral()
-      print "Difference between Data and Background"
+      # hDiffMM = hMeasMM
+      # hDiffEE = hMeasEE
+
+      print hDiffMM.Integral(), quadadd(BinError(hDiffMM))
+      print hDiffEE.Integral(), quadadd(BinError(hDiffEE))
+      print "Difference between Data and Background^"
+
+      print hMeasMM.Integral(), quadadd(BinError(hMeasMM))
+      print hMeasEE.Integral(), quadadd(BinError(hMeasEE))
+      print "DATA yield^"
+
+      print REBIN(hsWW[0]).Integral(), quadadd(BinError(REBIN(hsWW[0])))
+      print REBIN(hsWW[1]).Integral(), quadadd(BinError(REBIN(hsWW[1])))
+      print "NRB yield^"
+
+      print REBIN(hsDY[0]).Integral(), quadadd(BinError(REBIN(hsDY[0])))
+      print REBIN(hsDY[1]).Integral(), quadadd(BinError(REBIN(hsDY[1])))
+      print "DY yield^"
+
+      print hWZMM.Integral(), quadadd(BinError(hWZMM))
+      print hWZEE.Integral(), quadadd(BinError(hWZEE))
+      print "WZ yield^"
+
+      print MCRecoHistoMM.Integral(), quadadd(BinError(MCRecoHistoMM))
+      print MCRecoHistoEE.Integral(), quadadd(BinError(MCRecoHistoEE))
+      print "ZZ yield^"
+
+
+      #sys.exit("donesies")
 
       responseMM = RooUnfoldResponse (MCRecoHistoMM, MCGenHistoMM, GenVsReco2DHistoMM)
       responseEE = RooUnfoldResponse (MCRecoHistoEE, MCGenHistoEE, GenVsReco2DHistoEE)
@@ -405,6 +531,12 @@ def main( optunf="Bayes" ):
         hunfoldEE = unfoldsysEE.Hreco(2) # 3 Toy MC error evaluation. Would apply to both data-MC uncertainty, and MC response uncertainty.
         print "STUFF"*40
         hunfoldMM.Print("range")
+
+        print "UNFOLDED NUMBERS :--:"*10
+        print hunfoldMM.Integral(), quadadd(BinError(hunfoldMM))
+        print hunfoldEE.Integral(), quadadd(BinError(hunfoldEE))
+        print "UNFOLDED NUMBERS :--:"*10
+
         #############################
         #IMPORTANT!!! Includesys&Hreco: 0&2, 1&2 (some errors), N&2 (bayesian)*, 1&3, 2&3
         #############################
@@ -418,9 +550,30 @@ def main( optunf="Bayes" ):
 
       # print hTrueMM.Integral(), hTrueEE.Integral(), "True"
       print MCGenHistoMM.Integral(), MCGenHistoEE.Integral(), "Gen"
+      print hunfoldMM.Integral(), hunfoldEE.Integral(), "unfold"
       #makeComparison(MCGenHistoMM,MCRecoHistoMM,hTrueMM,hDiffMM,hCloseMM,"MM"+syst_ud)
       #makeComparison(MCGenHistoEE,MCRecoHistoEE,hTrueEE,hDiffEE,hCloseEE,"EE"+syst_ud)
 
+      #RESCALE TO MCFM with kinematic cut ratios
+      hunfoldEE.Multiply(MWO)
+      hunfoldMM.Multiply(MWO)
+      MCGenHistoEE.Multiply(MWO)
+      MCGenHistoMM.Multiply(MWO)
+      MCGenHistoEE2.Multiply(MWO)
+      MCGenHistoMM2.Multiply(MWO)
+      SSS = 3.0 #3.0 for single channel, 3.0/2.0 for both
+      hunfoldMM.Scale(SSS)
+      hunfoldEE.Scale(SSS)
+      MCGenHistoMM.Scale(SSS)
+      MCGenHistoEE.Scale(SSS)
+      MCGenHistoMM2.Scale(SSS)
+      MCGenHistoEE2.Scale(SSS)
+
+      print MCGenHistoMM.Integral(), MCGenHistoEE.Integral(), "Gen"
+      print hunfoldMM.Integral(), hunfoldEE.Integral(), "unfold"
+
+      #sys.exit("donesies")
+      
       #For mumu channel
       hDiffsEE.append([hDiffEE,syst_ud])
       hunfoldsEE.append([hunfoldEE,syst_ud])
@@ -428,6 +581,7 @@ def main( optunf="Bayes" ):
         hClosesEE.append([hCloseEE,syst_ud])
         MCGenHistosEE.append([MCGenHistoEE,syst_ud])
         MCRecoHistosEE.append([MCRecoHistoEE,syst_ud])
+        #MCGenHistosEE2.append([hMCFM,syst_ud])
 
       #For mumu channel
       hDiffsMM.append([hDiffMM,syst_ud])
@@ -436,6 +590,7 @@ def main( optunf="Bayes" ):
         hClosesMM.append([hCloseMM,syst_ud])
         MCGenHistosMM.append([MCGenHistoMM,syst_ud])
         MCRecoHistosMM.append([MCRecoHistoMM,syst_ud])
+        MCGenHistosMM2.append([hMCFM,syst_ud])
 
       #For combined channel
       hDiffs.append([ADDER(hDiffMM,hDiffEE,1),syst_ud])
@@ -444,11 +599,28 @@ def main( optunf="Bayes" ):
         hCloses.append([ADDER(hCloseMM,hCloseEE,1),syst_ud])
         MCGenHistos.append([ADDER(MCGenHistoMM,MCGenHistoEE,1),syst_ud])
         MCRecoHistos.append([ADDER(MCRecoHistoMM,MCRecoHistoEE,1),syst_ud])
+        MCGenHistos2.append([ADDER(MCGenHistoMM2,MCGenHistoEE2,1),syst_ud])
 
       print "=|"*20
+      print syst_ud*20
       print "unfold yield:"
       print (hunfoldMM.Integral()+hunfoldEE.Integral())/19.7
+      print (MCGenHistoMM.Integral() + MCGenHistoEE.Integral())/19.7, "Gen"
+
+      hunfoldMM.Print("range")
+      hunfoldEE.Print("range")
+      print ">GEN<"*40
+      MCGenHistoMM.Print("range")
+      MCGenHistoEE.Print("range")
+
       print "=|"*20
+
+
+
+      # print "=|"*20
+      # print "unfold yield:"
+      # print (hunfoldMM.Integral()+hunfoldEE.Integral())/19.7
+      # print "=|"*20
 
       # hDiffs.append([hDiffEE,syst_ud])
       # hunfolds.append([hunfoldEE,syst_ud])
@@ -457,65 +629,78 @@ def main( optunf="Bayes" ):
       #   MCGenHistos.append([MCGenHistoEE,syst_ud])
       #   MCRecoHistos.append([MCRecoHistoEE,syst_ud])
 
-    Neemm = makeComparison(LUMscale(MCGenHistos),LUMscale(MCRecoHistos),LUMscale(hunfolds),LUMscale(hDiffs),LUMscale(hCloses),"comb")
-    Nee = makeComparison(LUMscale(MCGenHistosEE),LUMscale(MCRecoHistosEE),LUMscale(hunfoldsEE),LUMscale(hDiffsEE),LUMscale(hClosesEE),"ee")
-    Nmm = makeComparison(LUMscale(MCGenHistosMM),LUMscale(MCRecoHistosMM),LUMscale(hunfoldsMM),LUMscale(hDiffsMM),LUMscale(hClosesMM),"mm")
-    #makeComparison(MCGenHistos,MCRecoHistos,hunfolds,hDiffs,hCloses)
-    print len(MCRecoHistos)
-    print len(hunfolds)
 
-    print "Bin Content Check"
-    print "#"*30
-    print "#"*10, "DIMUON CHANNEL", "#"*10
-    print "MCReco", MCRecoHistosMM[0][0].Integral(), BinContent(MCRecoHistosMM[0][0])
-    print "MCGen", MCGenHistosMM[0][0].Integral(), BinContent(MCGenHistosMM[0][0])
-    print "True", hunfoldsMM[0][0].Integral(), BinContent(hunfoldsMM[0][0])
-    print "Diff", hDiffsMM[0][0].Integral(), BinContent(hDiffsMM[0][0])
+    
+    #QQQ = makeComparison(LUMscale(MCGenHistos),LUMscale(MCRecoHistos),LUMscale(hunfolds),LUMscale(hDiffs),LUMscale(MCGenHistos2),"comb")
+    #QQQ= makeComparison(LUMscale(MCGenHistosEE),LUMscale(MCRecoHistosEE),LUMscale(hunfoldsEE),LUMscale(hDiffsEE),MCGenHistosMM2,"ee")
+    #QQQ = makeComparison(LUMscale(MCGenHistosMM),LUMscale(MCRecoHistosMM),LUMscale(hunfoldsMM),LUMscale(hDiffsMM),MCGenHistosMM2,"mm")
 
-    print "#"*30
-    print "#"*10, "DIELECTRON CHANNEL", "#"*10
-    print "MCReco", MCRecoHistosEE[0][0].Integral(), BinContent(MCRecoHistosEE[0][0])
-    print "MCGen", MCGenHistosEE[0][0].Integral(), BinContent(MCGenHistosEE[0][0])
-    print "True", hunfoldsEE[0][0].Integral(), BinContent(hunfoldsEE[0][0])
-    print "Diff", hDiffsEE[0][0].Integral(), BinContent(hDiffsEE[0][0])
+    #QQQ = makeComparison(LUMscale(MCGenHistos),LUMscale(MCRecoHistos),LUMscale(hunfolds),LUMscale(hDiffs),MCGenHistosMM2,"comb")
+    QQQ= makeComparison(LUMscale(MCGenHistosEE),LUMscale(MCRecoHistosEE),LUMscale(hunfoldsEE),LUMscale(hDiffsEE),MCGenHistosMM2,"ee")
+    #QQQ = makeComparison(LUMscale(MCGenHistosMM),LUMscale(MCRecoHistosMM),LUMscale(hunfoldsMM),LUMscale(hDiffsMM),MCGenHistosMM2,"mm")
+    Neemm = QQQ[0]
+    #Nee = makeComparison(LUMscale(MCGenHistosEE),LUMscale(MCRecoHistosEE),LUMscale(hunfoldsEE),LUMscale(hDiffsEE),LUMscale(hClosesEE),"ee")
+    #Nmm = makeComparison(LUMscale(MCGenHistosMM),LUMscale(MCRecoHistosMM),LUMscale(hunfoldsMM),LUMscale(hDiffsMM),LUMscale(hClosesMM),"mm")
+    # #makeComparison(MCGenHistos,MCRecoHistos,hunfolds,hDiffs,hCloses)
+    # print len(MCRecoHistos)
+    # print len(hunfolds)
 
-    print "#"*30
-    print "#"*10, "COMBINED CHANNEL", "#"*10
-    print "MCReco", MCRecoHistos[0][0].Integral(), BinContent(MCRecoHistos[0][0])
-    print "MCGen", MCGenHistos[0][0].Integral(), BinContent(MCGenHistos[0][0])
-    print "True", hunfolds[0][0].Integral(), BinContent(hunfolds[0][0])
-    print "Diff", hDiffs[0][0].Integral(), BinContent(hDiffs[0][0])
-    print "#"*30
-    print "#"*30
-    print "#"*30
+    # print "Bin Content Check"
+    # print "#"*30
+    # print "#"*10, "DIMUON CHANNEL", "#"*10
+    # print "MCReco", MCRecoHistosMM[0][0].Integral(), BinContent(MCRecoHistosMM[0][0])
+    # print "MCGen", MCGenHistosMM[0][0].Integral(), BinContent(MCGenHistosMM[0][0])
+    # print "True", hunfoldsMM[0][0].Integral(), BinContent(hunfoldsMM[0][0])
+    # print "Diff", hDiffsMM[0][0].Integral(), BinContent(hDiffsMM[0][0])
 
-    print hunfoldsMM[0][0].Integral()*(3.0)*2.13, "ZZ->2l2nu cross section, muon"
-    print hunfoldsEE[0][0].Integral()*(3.0)*2.13, "ZZ->2l2nu cross section, electron"
-    print hunfolds[0][0].Integral()*(3.0/2.0)*2.13, "ZZ->2l2nu cross section, combined"
+    # print "#"*30
+    # print "#"*10, "DIELECTRON CHANNEL", "#"*10
+    # print "MCReco", MCRecoHistosEE[0][0].Integral(), BinContent(MCRecoHistosEE[0][0])
+    # print "MCGen", MCGenHistosEE[0][0].Integral(), BinContent(MCGenHistosEE[0][0])
+    # print "True", hunfoldsEE[0][0].Integral(), BinContent(hunfoldsEE[0][0])
+    # print "Diff", hDiffsEE[0][0].Integral(), BinContent(hDiffsEE[0][0])
 
-    print "#"*30
+    # print "#"*30
+    # print "#"*10, "COMBINED CHANNEL", "#"*10
+    # print "MCReco", MCRecoHistos[0][0].Integral(), BinContent(MCRecoHistos[0][0])
+    # print "MCGen", MCGenHistos[0][0].Integral(), BinContent(MCGenHistos[0][0])
+    # print "True", hunfolds[0][0].Integral(), BinContent(hunfolds[0][0])
+    # print "Diff", hDiffs[0][0].Integral(), BinContent(hDiffs[0][0])
+    # print "#"*30
+    # print "#"*30
+    # print "#"*30
 
-    print Nmm
-    print Nee
+    # print hunfoldsMM[0][0].Integral()*(3.0)*2.13, "ZZ->2l2nu cross section, muon"
+    # print hunfoldsEE[0][0].Integral()*(3.0)*2.13, "ZZ->2l2nu cross section, electron"
+    # print hunfolds[0][0].Integral()*(3.0/2.0)*2.13, "ZZ->2l2nu cross section, combined"
+
+    # print "#"*30
+
+    # print Nmm
+    # print Nee
     print Neemm
 
-    print "@"*30
-    print "@"*30
-    print "@"*30
+    print QQQ[1]
+    #print Nmm
+    #print Nee
 
-    S=2.1299863918 
-    dS=0.0451194907919
+    # print "@"*30
+    # print "@"*30
+    # print "@"*30
 
-    print numpy.multiply(Nmm,S*3)
-    print numpy.multiply(Nee,S*3)
-    print numpy.multiply(Neemm,S*3.0/2.0)
+    # S=2.1299863918 
+    # dS=0.0451194907919
 
-    print "#"*30
-    print "#"*30
-    print "#"*30
-    print numpy.multiply(RescaleToPreZpt45(Nmm,S,dS),3.0), "muons"
-    print numpy.multiply(RescaleToPreZpt45(Nee,S,dS),3.0), "electrons"
-    print numpy.multiply(RescaleToPreZpt45(Neemm,S,dS),3.0/2.0), "combined"
+    # print numpy.multiply(Nmm,S*3)
+    # print numpy.multiply(Nee,S*3)
+    # print numpy.multiply(Neemm,S*3.0/2.0)
+
+    # print "#"*30
+    # print "#"*30
+    # print "#"*30
+    # print numpy.multiply(RescaleToPreZpt45(Nmm,S,dS),3.0), "muons"
+    # print numpy.multiply(RescaleToPreZpt45(Nee,S,dS),3.0), "electrons"
+    # print numpy.multiply(RescaleToPreZpt45(Neemm,S,dS),3.0/2.0), "combined"
 
     # Just unfolding
     # [ 317.58667967  124.62000891  124.62000891] muons
@@ -573,3 +758,44 @@ if __name__ == '__main__':
    main()
 
 #find . | xargs grep -i includesy
+
+#OCTOBER 14
+#MM
+# [120.86177641898394, 87.207360097483715, 54.102835311376005]
+# [array('d', [59.264869689941406, 20.704061508178711, 36.901435852050781, 4.0242819786071777, -0.032872609794139862]),
+#  array('d', [84.548566244550713, 12.168378614235534, 16.439000771170498, 5.2431443421886348, 3.2958844209195686]), 
+#  array('d', [51.27412928772943, 10.180920903350444, 13.244093055773886, 4.1747309845402034, 1.2629031679133138])]
+
+#EE
+# [97.169385194778442, 70.948573451642588, 42.906755333916742]
+# [array('d', [66.502143859863281, 10.880744934082031, 18.24371337890625, 1.5427830219268799, 0.0]),
+#  array('d', [69.572675560832906, 7.6762228846841456, 10.509961751661885, 3.662795966350084, 3.2470174071525228]),
+#  array('d', [41.231830659913797, 6.758145442503114, 8.5604871553838233, 3.3805623075039741, 3.2470174071525228])]
+
+# #MMEE
+# [109.01558259502053, 75.73236359413869, 42.898967503435358]
+# [array('d', [62.883506774902344, 15.792403221130371, 27.572576522827148, 2.7835323810577393, -0.016436304897069931]),
+#  array('d', [74.099106209375734, 8.5968292667172754, 12.33589803215032, 3.6444487520390485, 2.313329660801156]),
+#  array('d', [41.138746487341983, 6.8812648307523512, 9.4609744814826424, 2.8334775113606301, 1.7419849865623644])]
+
+
+######### YIELDS
+# 92.6294988394 18.7507174845
+# 60.4455697536 14.2232511426
+# Difference between Data and Background^
+# 266.0 16.3095064303
+# 171.0 13.0766968306
+# DATA yield^
+# 46.5093167702 5.48117554609
+# 31.1925465839 3.67607686865
+# NRB yield^
+# 62.6655246019 7.40574889993
+# 35.5378206968 4.16041366247
+# DY yield^
+# 64.1956506297 0.837259845187
+# 43.8240576237 0.691585193181
+# WZ yield^
+# 109.13416779 0.89299894204
+# 75.2732717022 0.742809023502
+
+#2.1299863918 0.0451194907919
